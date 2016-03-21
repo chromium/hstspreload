@@ -181,7 +181,7 @@ func check(out chan result, host string) {
 	conn.Close()
 
 	if firstSHA1, ok := findPropertyInChain(isSHA1, chain); ok && chain[0].NotAfter.Year() >= 2016 {
-		out <- result{host, fmt.Errorf("One or more of the certificates in your certificate chain is signed with SHA-1, but the leaf certificate extends into 2016. This needs to be replaced. See https://security.googleblog.com/2014/09/gradually-sunsetting-sha-1.html. (The first SHA-1 certificate found has a common-name of %q.)", firstSHA1.Subject.CommonName)}
+		out <- result{host, fmt.Errorf("One or more of the certificates in your certificate chain is signed with SHA-1, but the leaf certificate extends into 2016. This needs to be replaced. See https://security.googleblog.com/2015/12/an-update-on-sha-1-certificates-in.html. (The first SHA-1 certificate found has a common-name of %q.)", firstSHA1.Subject.CommonName)}
 		return
 	}
 
