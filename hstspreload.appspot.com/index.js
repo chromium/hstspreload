@@ -1,10 +1,11 @@
+
 var requestedDomain = "";
 
-function keypress(e) {
-  var code = (e.keyCode ? e.keyCode : e.which);
-  if (code != 13) {
-    return;
-  }
+function entrySubmit(e) {
+
+  e = e || window.event;
+  if (e.preventDefault) e.preventDefault();
+  e.returnValue = false;
 
   var textInput = document.getElementById("textinput");
   textInput.disabled = true;
@@ -31,9 +32,11 @@ function keypress(e) {
   xhr.timeout = 10000;
   requestedDomain = domain;
   xhr.send(null);
+
 }
 
 function handleReply(progress) {
+
   var xhr = progress.target;
 
   if (xhr.readyState != 4) {
@@ -71,7 +74,7 @@ function handleReply(progress) {
     var button = document.createElement('input');
     button.type = "submit";
     button.value = "Clear";
-    document.getElementById("msg").appendChild(button);
+    document.getElementById("output").appendChild(button);
     button.onclick = function(e) {
       document.getElementById("textinput").disabled = true;
       clearOutput();
@@ -133,7 +136,7 @@ function handleReply(progress) {
 
     var p = document.createElement('p');
     p.innerHTML = "Next, <a href=\"https://www.ssllabs.com/ssltest/analyze.html?d=" + encodeURIComponent(requestedDomain) + "\">check your HTTPS configuration</a> and fix any issues!";
-    document.getElementById("msg").appendChild(p);
+    document.getElementById("output").appendChild(p);
 
     document.getElementById("textinput").value = "";
     return;
@@ -166,21 +169,36 @@ function handleClearReply(progress) {
 }
 
 function clearOutput() {
-  var msgDiv = document.getElementById("msg");
-  while (msgDiv.hasChildNodes()) {
-    msgDiv.removeChild(msgDiv.lastChild);
+  var outputDiv = document.getElementById("output");
+  while (outputDiv.hasChildNodes()) {
+    outputDiv.removeChild(outputDiv.lastChild);
   }
-  document.getElementById("error").textContent = "";
 }
 
 function showError(msg) {
-  document.getElementById("error").textContent = "Sorry! " + msg;
+  var p = document.createElement('p');
+  p.textContent = "Sorry! " + msg;
+  p.setAttribute('class', 'error');
+  document.getElementById("output").appendChild(p);
   document.getElementById("textinput").disabled = false;
 }
 
 function showMessage(msg) {
   var p = document.createElement('p');
   p.textContent = msg;
-  document.getElementById("msg").appendChild(p);
+  document.getElementById("output").appendChild(p);
   document.getElementById("textinput").disabled = false;
+}
+
+function init() {
+  var entryForm = document.getElementById('entry');
+  if (entryForm) {
+    entryForm.addEventListener('submit', entrySubmit);
+  }
+}
+
+if (document.readyState !== 'loading') {
+  window.setTimeout(init); // Handle asynchronously
+} else {
+  document.addEventListener('DOMContentLoaded', init);
 }
