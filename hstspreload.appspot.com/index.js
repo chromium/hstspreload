@@ -24,7 +24,7 @@ function keypress(e) {
   }
 
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/submit/" + domain, true);
+  xhr.open("POST", "/submit/" + encodeURIComponent(domain), true);
   xhr.onreadystatechange = handleReply;
   xhr.onerror = handleError;
   xhr.onTimeout = handleTimeout;
@@ -77,7 +77,7 @@ function handleReply(progress) {
       clearOutput();
 
       var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/clear/" + requestedDomain, true);
+      xhr.open("POST", "/clear/" + encodeURIComponent(requestedDomain), true);
       xhr.onreadystatechange = handleClearReply;
       xhr.onerror = handleError;
       xhr.onTimeout = handleTimeout;
