@@ -176,18 +176,28 @@ function clearOutput() {
 }
 
 function showError(msg) {
-  var p = document.createElement('p');
-  p.textContent = "Sorry! " + msg;
-  p.setAttribute('class', 'error');
-  document.getElementById("output").appendChild(p);
-  document.getElementById("textinput").disabled = false;
+  showMessage("Sorry! " + msg, true);
 }
 
-function showMessage(msg) {
-  var p = document.createElement('p');
+function showMessage(msg, error) {
+
+  var p = document.createElement('p'),
+      output = document.getElementById("output"),
+      input = document.getElementById("textinput");
+
   p.textContent = msg;
-  document.getElementById("output").appendChild(p);
-  document.getElementById("textinput").disabled = false;
+  if (error) {
+    p.setAttribute('class', 'error');
+  }
+
+  output.appendChild(p);
+  output.setAttribute('tabindex', -1);
+  output.setAttribute('role', 'alert');
+  output.style.outline = 'none';
+  output.focus();
+
+  input.disabled = false;
+
 }
 
 function init() {
