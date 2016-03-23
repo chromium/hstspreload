@@ -18,7 +18,7 @@ body {
 
 .ribbon {
   width: 100%;
-  height: 40vh;
+  height: 20em; /* 40vh causes the ribbon to move when an error message appears */
   background-color: #3F51B5;
 }
 
@@ -27,7 +27,8 @@ body {
   font-size: 14px;
   background-color: #ffffff;
   color: #424242;
-  margin: calc(-35vh + 16px) auto 80px;
+  /*margin: calc(-35vh + 16px) auto 80px; - now the height isn't 40vh, we don't need calc() */
+  margin: -20em auto 0;
   max-width: 939px;
   width: calc(80% - 138px);
   box-shadow:0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
@@ -94,15 +95,29 @@ p {
   text-align: center;
 }
 
-#entry input {
+#entry #textinput {
   font-family: sans-serif;
-  margin: auto;
+  margin: 1em auto;
   font-size: 1.5em;
   display: block;
-  margin-bottom: 1em;
   width: 100%;
   max-width: 20em;
   text-align: center;
+}
+
+#entry #confirmwrapper {
+  padding: 0 2em 0 3.8em;
+  margin-bottom: 1em;
+}
+
+#entry #confirmwrapper span {
+  width: 1.8em;
+  margin: 0 0 0 -1.8em;
+  display: inline-block;
+}
+
+#entry #submit {
+  padding: 0 2em;
 }
 
 #entry p {
@@ -112,7 +127,7 @@ p {
   text-align: center;
 }
 
-#error {
+#entry p.error {
   color: red;
 }
 
