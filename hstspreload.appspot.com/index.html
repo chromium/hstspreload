@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=0.5">
   <title>HSTS Preload Submission</title>
   <link rel="stylesheet" href="style.css">
@@ -16,13 +18,23 @@
     </div>
   </div>
 
-  <div id="entry">
-    <h2><label for="textinput">Enter a domain to include in the HSTS preload list:</label></h2>
-    <input id="textinput" onkeypress="keypress(event)" type="text" placeholder="example.com" autofocus></input>
+  <form action="./" method="post" accept-charset="UTF-8" id="entry">
 
-    <p id="error"></p>
-    <div id="msg"></div>
-  </div>
+    <h2><label for="textinput">Enter a domain to include in the HSTS preload list:</label></h2>
+
+    <div id="output"></div>
+
+    <input id="textinput" type="text" placeholder="example.com" autofocus="autofocus" />
+
+    <div id="confirmwrapper">
+        <span><input type="checkbox" id="confirm" name="confirm" value="true" required="required" /> </span><label for="confirm">I understand that preloading a domain through this form will require every subdomain of this site to serve a valid certificate (for that subdomain) in order to remain accessible in Chrome.</label>
+    </div>
+
+    <div id="submit">
+		<input type="submit" value="Submit" />
+	</div>
+
+  </form>
 
   <div class="inner-content">
 
