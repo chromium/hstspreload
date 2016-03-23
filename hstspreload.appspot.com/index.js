@@ -1,10 +1,11 @@
+
 var requestedDomain = "";
 
-function keypress(e) {
-  var code = (e.keyCode ? e.keyCode : e.which);
-  if (code != 13) {
-    return;
-  }
+function entrySubmit(e) {
+
+  e = e || window.event;
+  if (e.preventDefault) e.preventDefault();
+  e.returnValue = false;
 
   var textInput = document.getElementById("textinput");
   textInput.disabled = true;
@@ -31,9 +32,11 @@ function keypress(e) {
   xhr.timeout = 10000;
   requestedDomain = domain;
   xhr.send(null);
+
 }
 
 function handleReply(progress) {
+
   var xhr = progress.target;
 
   if (xhr.readyState != 4) {
@@ -71,7 +74,7 @@ function handleReply(progress) {
     var button = document.createElement('input');
     button.type = "submit";
     button.value = "Clear";
-    document.getElementById("msg").appendChild(button);
+    document.getElementById("output").appendChild(button);
     button.onclick = function(e) {
       document.getElementById("textinput").disabled = true;
       clearOutput();
@@ -166,21 +169,46 @@ function handleClearReply(progress) {
 }
 
 function clearOutput() {
-  var msgDiv = document.getElementById("msg");
-  while (msgDiv.hasChildNodes()) {
-    msgDiv.removeChild(msgDiv.lastChild);
+  var outputDiv = document.getElementById("output");
+  while (outputDiv.hasChildNodes()) {
+    outputDiv.removeChild(outputDiv.lastChild);
   }
-  document.getElementById("error").textContent = "";
 }
 
 function showError(msg) {
-  document.getElementById("error").textContent = "Sorry! " + msg;
-  document.getElementById("textinput").disabled = false;
+  showMessage("Sorry! " + msg, true);
 }
 
-function showMessage(msg) {
-  var p = document.createElement('p');
+function showMessage(msg, error) {
+
+  var p = document.createElement('p'),
+      output = document.getElementById("output"),
+      input = document.getElementById("textinput");
+
   p.textContent = msg;
-  document.getElementById("msg").appendChild(p);
-  document.getElementById("textinput").disabled = false;
+  if (error) {
+    p.setAttribute('class', 'error');
+  }
+
+  output.appendChild(p);
+  output.setAttribute('tabindex', -1);
+  output.setAttribute('role', 'alert');
+  output.style.outline = 'none';
+  output.focus();
+
+  input.disabled = false;
+
+}
+
+function init() {
+  var entryForm = document.getElementById('entry');
+  if (entryForm) {
+    entryForm.addEventListener('submit', entrySubmit);
+  }
+}
+
+if (document.readyState !== 'loading') {
+  window.setTimeout(init); // Handle asynchronously
+} else {
+  document.addEventListener('DOMContentLoaded', init);
 }
