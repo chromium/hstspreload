@@ -24,7 +24,7 @@ function keypress(e) {
   }
 
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/submit/" + domain, true);
+  xhr.open("POST", "/submit/" + encodeURIComponent(domain), true);
   xhr.onreadystatechange = handleReply;
   xhr.onerror = handleError;
   xhr.onTimeout = handleTimeout;
@@ -77,7 +77,7 @@ function handleReply(progress) {
       clearOutput();
 
       var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/clear/" + requestedDomain, true);
+      xhr.open("POST", "/clear/" + encodeURIComponent(requestedDomain), true);
       xhr.onreadystatechange = handleClearReply;
       xhr.onerror = handleError;
       xhr.onTimeout = handleTimeout;
@@ -132,7 +132,7 @@ function handleReply(progress) {
     showMessage("Thank you! That domain has been queued for review. Review can take several weeks. You can check the status by entering the same domain again in the future.");
 
     var p = document.createElement('p');
-    p.innerHTML = "Next, <a href=\"https://www.ssllabs.com/ssltest/analyze.html?d=" + requestedDomain + "\">check your HTTPS configuration</a> and fix any issues!";
+    p.innerHTML = "Next, <a href=\"https://www.ssllabs.com/ssltest/analyze.html?d=" + encodeURIComponent(requestedDomain) + "\">check your HTTPS configuration</a> and fix any issues!";
     document.getElementById("msg").appendChild(p);
 
     document.getElementById("textinput").value = "";
