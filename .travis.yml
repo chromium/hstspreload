@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - 1.6
+
+install:
+  - go get github.com/golang/lint/golint
+  - go get golang.org/x/net/publicsuffix
+  - go get google.golang.org/cloud/datastore
+
+script:
+  - make travis
