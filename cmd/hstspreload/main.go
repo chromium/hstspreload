@@ -39,7 +39,7 @@ Examples:
   hstspreload -h "max-age=10886400; includeSubDomains"
   
   echo -e "wikipedia.org\nexample.com" > domains.txt
-  cat domains.txt | hstspreload batch
+  hstspreload batch domains.txt
 
 Return code:
 
