@@ -127,7 +127,7 @@ var preloadableDomainTests = []preloadableDomainTest{
 				{Code: "domain.is_subdomain"},
 				{
 					Code:    "domain.tls.invalid_cert_chain",
-					Message: "https://incomplete-chain.badssl.com uses an incomplete or invalid certificate chain. Check out your site at https://www.ssllabs.com/ssltest/",
+					Message: "https://incomplete-chain.badssl.com uses an incomplete or invalid certificate chain. Check out your site at https://www.ssllabs.com/ssltest/analyze.html?d=incomplete-chain.badssl.com",
 				},
 			},
 		},
