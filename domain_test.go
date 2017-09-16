@@ -127,7 +127,7 @@ var preloadableDomainTests = []preloadableDomainTest{
 				{Code: "domain.is_subdomain"},
 				{
 					Code:    "domain.tls.invalid_cert_chain",
-					Message: "https://incomplete-chain.badssl.com uses an incomplete or invalid certificate chain. Check out your site at https://www.ssllabs.com/ssltest/",
+					Message: "https://incomplete-chain.badssl.com uses an incomplete or invalid certificate chain. Check out your site at https://www.ssllabs.com/ssltest/analyze.html?d=incomplete-chain.badssl.com",
 				},
 			},
 		},
@@ -161,7 +161,7 @@ var preloadableDomainTests = []preloadableDomainTest{
 				{Code: "domain.is_subdomain"},
 				{
 					Code:    "domain.tls.invalid_cert_chain",
-					Message: "https://self-signed.badssl.com uses an incomplete or invalid certificate chain. Check out your site at https://www.ssllabs.com/ssltest/",
+					Message: "https://self-signed.badssl.com uses an incomplete or invalid certificate chain. Check out your site at https://www.ssllabs.com/ssltest/analyze.html?d=self-signed.badssl.com",
 				},
 			},
 		},
@@ -195,7 +195,7 @@ var preloadableDomainTests = []preloadableDomainTest{
 			Warnings: []Issue{
 				{
 					Code:    "tls.obsolete_cipher_suite",
-					Message: "The site is using obsolete TLS settings. Check out the site at https://www.ssllabs.com/ssltest/",
+					Message: "The site is using obsolete TLS settings. Check out the site at https://www.ssllabs.com/ssltest/analyze.html?d=cbc.badssl.com",
 				},
 			},
 		},
