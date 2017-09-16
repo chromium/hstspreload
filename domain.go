@@ -179,7 +179,8 @@ func getResponse(domain string) (*http.Response, Issues) {
 			"Invalid Certificate Chain",
 			"https://%s uses an incomplete or "+
 				"invalid certificate chain. Check out your site at "+
-				"https://www.ssllabs.com/ssltest/",
+				"https://www.ssllabs.com/ssltest/analyze.html?d=%s",
+			domain,
 			domain,
 		)
 	}
