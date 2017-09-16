@@ -54,7 +54,8 @@ func checkCipherSuite(connState tls.ConnectionState) Issues {
 			IssueCode("tls.obsolete_cipher_suite"),
 			"Obsolete Cipher Suite",
 			"The site is using obsolete TLS settings. "+
-				"Check out the site at https://www.ssllabs.com/ssltest/",
+				"Check out the site at https://www.ssllabs.com/ssltest/analyze.html?d=%s",
+			domain,
 		)
 	}
 }
