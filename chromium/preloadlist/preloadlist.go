@@ -141,7 +141,7 @@ func removeComments(r io.Reader) ([]byte, error) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
 		line := sc.Text()
-		if isCommentLine(line) {
+		if !isCommentLine(line) {
 			fmt.Fprintln(&buf, line)
 		}
 	}
@@ -154,7 +154,7 @@ func removeComments(r io.Reader) ([]byte, error) {
 
 func isCommentLine(line string) bool {
 	trimmed := strings.TrimLeftFunc(line, unicode.IsSpace)
-	return !strings.HasPrefix(trimmed, "//")
+	return strings.HasPrefix(trimmed, "//")
 }
 
 // NewFromChromiumURL retrieves the PreloadList from a URL that returns the list
