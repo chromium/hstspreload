@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - 1.8
+
+install:
+  - go get github.com/golang/lint/golint
+  - go get golang.org/x/net/publicsuffix
+
+script:
+  - make travis

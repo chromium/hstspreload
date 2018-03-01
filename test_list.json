@@ -1,0 +1,9 @@
+{
+  "entries": [
+    {"name": "garron.net", "include_subdomains": true, "mode": "force-https"},
+    {"name": "example.com", "include_subdomains": false, "mode": "force-https"},
+    {"name": "gmail.com", "mode": "force-https"}
+    {"name": "google.com"}
+    {"name": "pinned.badssl.com", "pins": "pinnymcpinnedkey"}
+  ]
+}
