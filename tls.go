@@ -34,8 +34,12 @@ func checkSHA1(chain []*x509.Certificate) Issues {
 func checkCipherSuite(connState tls.ConnectionState) Issues {
 	issues := Issues{}
 
-	// No need to check the TLS version, since the modern ciphers are only supported on TLS 1.2
+	// All cipher suites in TLS 1.3 are considered modern.
+	if connState.Version > tls.VersionTLS12 {
+		return Issues{}
+	}
 
+	// These modern cipher suites are only supported in TLS 1.2.
 	switch connState.CipherSuite {
 	case tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:
 		fallthrough
