@@ -242,7 +242,7 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
 		issues = issues.addWarningf(
 			"header.preloadable.max_age.over_10_years",
 			"Max-age > 10 years",
-			"FYI: The max-age (%d seconds) is longer than 10 years, which is an unusually long value, and may be disregarded by some browsers.",
+			"FYI: The max-age (%d seconds) is longer than 10 years, which is an unusually long value, and may be capped to a lower value in some browsers.",
 			hstsHeader.MaxAge.Seconds,
 		)
 
