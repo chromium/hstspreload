@@ -2,6 +2,7 @@ package hstspreload
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -185,8 +186,15 @@ func preloadableRedirects(initialURL string) (chain []*url.URL, issues Issues) {
 		},
 		Timeout: dialTimeout,
 	}
+	req, err := http.NewRequest("GET", initialURL, nil)
+	if err != nil {
+		return nil, issues
+	}
 
-	_, err := client.Get(initialURL)
+	fmt.Printf("redirects.go setting custom User-Agent: hsts-preload-bot")
+	req.Header.Set("User-Agent", "hsts-preload-bot")
+	_, err = client.Do(req)
+
 	if err != nil {
 		if strings.HasSuffix(err.Error(), tooManyRedirects.Error()) {
 			issues = issues.addErrorf(

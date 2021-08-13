@@ -2,6 +2,7 @@ package hstspreload
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -84,7 +85,15 @@ func getFirstResponseWithTransport(initialURL string, transport *http.Transport)
 		return ok && urlError.Err == redirectPrevented
 	}
 
-	resp, err := client.Get(initialURL)
+	req, err := http.NewRequest("GET", initialURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("response.go setting custom User-Agent: hsts-preload-bot")
+	req.Header.Set("User-Agent", "hsts-preload-bot")
+	resp, err := client.Do(req)
+
 	if isRedirectPrevented(err) {
 		return resp, nil
 	}
