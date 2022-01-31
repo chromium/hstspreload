@@ -190,7 +190,7 @@ func preloadableRedirects(initialURL string) (chain []*url.URL, issues Issues) {
 		return nil, issues
 	}
 
-	req.Header.Set("User-Agent", "hsts-preload-bot")
+	req.Header.Set("User-Agent", "hstspreload-bot")
 	_, err = client.Do(req)
 
 	if err != nil {
