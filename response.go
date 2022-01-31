@@ -89,7 +89,7 @@ func getFirstResponseWithTransport(initialURL string, transport *http.Transport)
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", "hsts-preload-bot")
+	req.Header.Set("User-Agent", "hstspreload-bot")
 	resp, err := client.Do(req)
 
 	if isRedirectPrevented(err) {
