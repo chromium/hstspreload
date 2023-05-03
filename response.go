@@ -2,6 +2,7 @@ package hstspreload
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -12,10 +13,14 @@ func checkSingleHeader(resp *http.Response) (header *string, issues Issues) {
 
 	switch {
 	case len(hstsHeaders) == 0:
+		curlInfo := ""
+		if resp.Request != nil {
+			curlInfo = fmt.Sprintf(" Check that the following terminal command outputs `Strict-Transport-Security`: curl -I \"%v\"", resp.Request.URL)
+		}
 		return nil, issues.addErrorf(
 			"response.no_header",
 			"No HSTS header",
-			"Response error: No HSTS header is present on the response.")
+			"Response error: No HSTS header is present on the response.%s", curlInfo)
 
 	case len(hstsHeaders) > 1:
 		// TODO: Give feedback on the first(last?) HSTS header?
