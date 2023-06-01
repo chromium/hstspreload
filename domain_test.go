@@ -38,6 +38,9 @@ var testCheckDomainFormatTests = []struct {
 	{"example&co.com",
 		Issues{Errors: []Issue{{Code: "domain.format.invalid_characters"}}},
 	},
+	{"1.1.1.1",
+		Issues{Errors: []Issue{{Code: "domain.format.is_ip_address"}}},
+	},
 }
 
 func TestCheckDomainFormat(t *testing.T) {

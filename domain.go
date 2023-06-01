@@ -237,6 +237,14 @@ func checkDomainFormat(domain string) Issues {
 		return issues.addErrorf("domain.format.invalid_characters", "Invalid domain name", "Please provide a domain using valid characters (letters, numbers, dashes, dots).")
 	}
 
+	ip := net.ParseIP(domain)
+	if ip != nil {
+		return issues.addErrorf(
+			IssueCode("domain.format.is_ip_address"),
+			"Invalid domain name",
+			"Please provide a domain, not an IP address")
+	}
+
 	return issues
 }
 
