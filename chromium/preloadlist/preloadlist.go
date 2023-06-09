@@ -54,8 +54,9 @@ type PreloadList struct {
 //
 // - Mode: The only valid non-empty value is ForceHTTPS
 //
-//   - IncludeSubDomains: If Mode == ForceHTTPS, forces HSTS to apply to
-//     all subdomains.
+// - IncludeSubDomains: If Mode == ForceHTTPS, forces HSTS to apply to all subdomains.
+//
+// - Policy: The policy that was enforced when the the domain was added to the preload list.
 type Entry struct {
 	Name              string `json:"name"`
 	Mode              string `json:"mode"`
