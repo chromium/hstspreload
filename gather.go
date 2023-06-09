@@ -2,8 +2,10 @@ package hstspreload
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
 	"log"
+
+	preloadlist "github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 // Defines a structure to hold the json contents. The struct attributes come from the json file
@@ -15,11 +17,24 @@ type Domain struct {
 }
 
 func main() {
-	// reads the JSON file into the data variable
-	// QUESTION: HOW CAN I ACCESS TEH JSON FILE SINCE IT'S NOT IN THIS REPO
-	data, err := ioutil.ReadFile("transport_security_state_static.json")
-	if err != nil {
+	// Gets a preload list of domains
+	prealoadList, listErr := preloadlist.NewFromLatest()
+	if listErr != nil {
+		err := fmt.Sprintf(
+			"Internal error: could not retrieve latest preload list. (%s)\n",
+			listErr,
+		)
+
+		// will change the format for logging an error in the future? Any ideas?
+		// Do I need to treat this function as an API?
 		log.Fatal(err)
+		return
+	}
+	var actualPreload []preloadlist.Entry
+	for _, entry := range prealoadList.Entries {
+		if entry.Mode == preloadlist.ForceHTTPS {
+			actualPreload = append(actualPreload, entry)
+		}
 	}
 
 	// creates a slice for removable-eligible domains to be held in and
