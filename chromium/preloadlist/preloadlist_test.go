@@ -130,11 +130,11 @@ var (
   ]
 }`
 	testParsed = PreloadList{Entries: []Entry{
-		{"garron.net", "force-https", true},
-		{"example.com", "force-https", false},
-		{"gmail.com", "force-https", false},
-		{"google.com", "", false},
-		{"pinned.badssl.com", "", false}},
+		{"garron.net", "force-https", true, ""},
+		{"example.com", "force-https", false, ""},
+		{"gmail.com", "force-https", false, ""},
+		{"google.com", "", false, ""},
+		{"pinned.badssl.com", "", false, ""}},
 	}
 )
 

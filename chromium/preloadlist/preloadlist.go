@@ -56,10 +56,15 @@ type PreloadList struct {
 //
 // - IncludeSubDomains: If Mode == ForceHTTPS, forces HSTS to apply to
 //   all subdomains.
+// 
+// - The policy that was enforced when the the domain was added to the preload list.
+//   Will be used to filter lists for automated removal from preload list as domains under
+//   different policies may adhere to different dynamic hsts requirements.
 type Entry struct {
 	Name              string `json:"name"`
 	Mode              string `json:"mode"`
 	IncludeSubDomains bool   `json:"include_subdomains"`
+	Policy            string `json:"policy"`
 }
 
 // IndexedEntries is case-insensitive index of
@@ -99,7 +104,7 @@ func (idx IndexedEntries) Get(domain string) (Entry, HstsPreloadEntryFound) {
 			return entry, AncestorEntryFound
 		}
 	}
-	return Entry{"", "", false}, EntryNotFound
+	return Entry{"", "", false, ""}, EntryNotFound
 }
 
 // parentDomain finds the parent (immediate ancestor) domain of the input domain.
