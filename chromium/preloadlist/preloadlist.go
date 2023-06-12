@@ -54,11 +54,12 @@ type PreloadList struct {
 //
 // - Mode: The only valid non-empty value is ForceHTTPS
 //
-// - IncludeSubDomains: If Mode == ForceHTTPS, forces HSTS to apply to all subdomains.
-//
-//   - Policy: The policy that was enforced when the the domain was added to the preload list.
-//     Will be used to filter lists for automated removal from preload list as domains under
-//     different policies may adhere to different dynamic hsts requirements
+// - IncludeSubDomains: If Mode == ForceHTTPS, forces HSTS to apply to
+//   all subdomains.
+// 
+// - The policy that was enforced when the the domain was added to the preload list.
+//   Will be used to filter lists for automated removal from preload list as domains under
+//   different policies may adhere to different dynamic hsts requirements.
 type Entry struct {
 	Name              string `json:"name"`
 	Mode              string `json:"mode"`
@@ -103,7 +104,7 @@ func (idx IndexedEntries) Get(domain string) (Entry, HstsPreloadEntryFound) {
 			return entry, AncestorEntryFound
 		}
 	}
-	return Entry{"", "", false, "custom"}, EntryNotFound
+	return Entry{"", "", false, ""}, EntryNotFound
 }
 
 // parentDomain finds the parent (immediate ancestor) domain of the input domain.
