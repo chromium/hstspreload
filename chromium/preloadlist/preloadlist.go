@@ -47,6 +47,9 @@ type PreloadList struct {
 	Entries []Entry `json:"entries"`
 }
 
+// PolicyType represents the policy under whcih the domain was added to the preload list
+type PolicyType string 
+
 // A Entry contains the data from an entry in the Chromium
 // Preload list.
 //
@@ -61,10 +64,10 @@ type PreloadList struct {
 //   Will be used to filter lists for automated removal from preload list as domains under
 //   different policies may adhere to different dynamic hsts requirements.
 type Entry struct {
-	Name              string `json:"name"`
-	Mode              string `json:"mode"`
-	IncludeSubDomains bool   `json:"include_subdomains"`
-	Policy            string `json:"policy"`
+	Name              string     `json:"name"`
+	Mode              string     `json:"mode"`
+	IncludeSubDomains bool       `json:"include_subdomains"`
+	Policy            PolicyType `json:"policy"`
 }
 
 // IndexedEntries is case-insensitive index of
