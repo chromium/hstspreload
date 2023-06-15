@@ -50,7 +50,7 @@ type PreloadList struct {
 // PolicyType represents the policy under which the domain is a part of the preload list
 type PolicyType string 
 
-// PolicyType values are as defined by 
+// Possible PolicyType values are as defined by 
 // https://source.chromium.org/chromium/chromium/src/+/main:net/http/transport_security_state_static.json
 const (
 	// test domains
