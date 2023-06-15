@@ -47,7 +47,7 @@ type PreloadList struct {
 	Entries []Entry `json:"entries"`
 }
 
-// PolicyType represents the policy under whcih the domain was added to the preload list
+// PolicyType represents the policy under which the domain was added to the preload list
 type PolicyType string 
 
 // A Entry contains the data from an entry in the Chromium
