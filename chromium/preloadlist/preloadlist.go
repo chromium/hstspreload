@@ -48,7 +48,6 @@ type PreloadList struct {
 }
 
 // PolicyType represents the policy under which the domain is a part of the preload list
-// PolicyType values are as defined by https://source.chromium.org/chromium/chromium/src/+/main:net/http/transport_security_state_static.json
 //	- "test": test domains.
 //	- "google": Google-owned sites.
 //	- "custom": entries without includeSubdomains or with HPKP.
@@ -61,6 +60,28 @@ type PreloadList struct {
 //	  been preloaded at the request of the the public suffix owner (e.g.
 //	  the registry for the TLD).
 type PolicyType string 
+
+// PolicyType values are as defined by 
+// https://source.chromium.org/chromium/chromium/src/+/main:net/http/transport_security_state_static.json
+const (
+	// test domains
+	Test PolicyType = "test"
+	// Google-owned sites
+	Google PolicyType = "google"
+	// Entries without includeSubdomains or with HPKP
+	Custom PolicyType = "custom"
+	// Bulk entries preloaded before Chrome 50
+	BulkLegacy PolicyType = "bulk-legacy"
+	// Bulk entries with max-age >= 18 weeks (Chrome 50-63)
+	Bulk18Weeks PolicyType = "bulk-18-weeks"
+	// Bulk entries with max-age >= 1 year (after Chrome 63)
+	Bulk1Year PolicyType = "bulk-1-year"
+	// Public suffixes (e.g. TLDs or other public suffix list entries) preloaded at the owner's request.	
+	PublicSuffix PolicyType = "public-suffix"
+	// domains under a public suffix that have been preloaded at the request of the the public suffix owner
+	// (e.g. the registry for the TLD).
+	PublicSuffixRequested PolicyType = "public-suffix-requested"
+)
 
 // A Entry contains the data from an entry in the Chromium
 // Preload list.
