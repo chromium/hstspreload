@@ -48,17 +48,6 @@ type PreloadList struct {
 }
 
 // PolicyType represents the policy under which the domain is a part of the preload list
-//	- "test": test domains.
-//	- "google": Google-owned sites.
-//	- "custom": entries without includeSubdomains or with HPKP.
-//	- "bulk-legacy": bulk entries preloaded before Chrome 50.
-//	- "bulk-18-weeks": bulk entries with max-age >= 18 weeks (Chrome 50-63       ).
-//	- "bulk-1-year": bulk entries with max-age >= 1 year (after Chrome 63)       .
-//	- "public-suffix": public suffixes (e.g. TLDs or other public suffix
-//	  list entries) preloaded at the owner's request.
-//	- "public-suffix-requested": domains under a public suffix that have
-//	  been preloaded at the request of the the public suffix owner (e.g.
-//	  the registry for the TLD).
 type PolicyType string 
 
 // PolicyType values are as defined by 
