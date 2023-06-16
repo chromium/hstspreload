@@ -56,20 +56,20 @@ const (
 	// test domains
 	Test PolicyType = "test"
 	// Google-owned sites
-	Google PolicyType = "google"
+	Google = "google"
 	// Entries without includeSubdomains or with HPKP
-	Custom PolicyType = "custom"
+	Custom = "custom"
 	// Bulk entries preloaded before Chrome 50
-	BulkLegacy PolicyType = "bulk-legacy"
+	BulkLegacy = "bulk-legacy"
 	// Bulk entries with max-age >= 18 weeks (Chrome 50-63)
-	Bulk18Weeks PolicyType = "bulk-18-weeks"
+	Bulk18Weeks = "bulk-18-weeks"
 	// Bulk entries with max-age >= 1 year (after Chrome 63)
-	Bulk1Year PolicyType = "bulk-1-year"
+	Bulk1Year = "bulk-1-year"
 	// Public suffixes (e.g. TLDs or other public suffix list entries) preloaded at the owner's request.	
-	PublicSuffix PolicyType = "public-suffix"
+	PublicSuffix = "public-suffix"
 	// domains under a public suffix that have been preloaded at the request of the the public suffix owner
 	// (e.g. the registry for the TLD).
-	PublicSuffixRequested PolicyType = "public-suffix-requested"
+	PublicSuffixRequested = "public-suffix-requested"
 )
 
 // A Entry contains the data from an entry in the Chromium
