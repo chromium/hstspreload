@@ -57,19 +57,19 @@ const (
 	UnspecifiedPolicyType = ""
 	// Test domains.
 	Test PolicyType = "test"
-	// Google-owned sites.
+	// Google-owned sites
 	Google = "google"
-	// Entries without includeSubdomains or with HPKP.
+	// Entries without includeSubdomains or with HPKP
 	Custom = "custom"
-	// Bulk entries preloaded before Chrome 50.
+	// Bulk entries preloaded before Chrome 50
 	BulkLegacy = "bulk-legacy"
-	// Bulk entries with max-age >= 18 weeks (Chrome 50-63).
+	// Bulk entries with max-age >= 18 weeks (Chrome 50-63)
 	Bulk18Weeks = "bulk-18-weeks"
-	// Bulk entries with max-age >= 1 year (after Chrome 63).
+	// Bulk entries with max-age >= 1 year (after Chrome 63)
 	Bulk1Year = "bulk-1-year"
 	// Public suffixes (e.g. TLDs or other public suffix list entries) preloaded at the owner's request.	
 	PublicSuffix = "public-suffix"
-	// Domains under a public suffix that have been preloaded at the request of the the public suffix owner
+	// domains under a public suffix that have been preloaded at the request of the the public suffix owner
 	// (e.g. the registry for the TLD).
 	PublicSuffixRequested = "public-suffix-requested"
 )
