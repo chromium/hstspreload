@@ -47,6 +47,31 @@ type PreloadList struct {
 	Entries []Entry `json:"entries"`
 }
 
+// PolicyType represents the policy under which the domain is a part of the preload list
+type PolicyType string 
+
+// Possible PolicyType values are as defined by 
+// https://source.chromium.org/chromium/chromium/src/+/main:net/http/transport_security_state_static.json
+const (
+	// test domains
+	Test PolicyType = "test"
+	// Google-owned sites
+	Google = "google"
+	// Entries without includeSubdomains or with HPKP
+	Custom = "custom"
+	// Bulk entries preloaded before Chrome 50
+	BulkLegacy = "bulk-legacy"
+	// Bulk entries with max-age >= 18 weeks (Chrome 50-63)
+	Bulk18Weeks = "bulk-18-weeks"
+	// Bulk entries with max-age >= 1 year (after Chrome 63)
+	Bulk1Year = "bulk-1-year"
+	// Public suffixes (e.g. TLDs or other public suffix list entries) preloaded at the owner's request.	
+	PublicSuffix = "public-suffix"
+	// domains under a public suffix that have been preloaded at the request of the the public suffix owner
+	// (e.g. the registry for the TLD).
+	PublicSuffixRequested = "public-suffix-requested"
+)
+
 // A Entry contains the data from an entry in the Chromium
 // Preload list.
 //
@@ -57,14 +82,14 @@ type PreloadList struct {
 // - IncludeSubDomains: If Mode == ForceHTTPS, forces HSTS to apply to
 //   all subdomains.
 // 
-// - The policy that was enforced when the the domain was added to the preload list.
+// - Policy: The policy that was enforced when the the domain was added to the preload list.
 //   Will be used to filter lists for automated removal from preload list as domains under
 //   different policies may adhere to different dynamic hsts requirements.
 type Entry struct {
-	Name              string `json:"name"`
-	Mode              string `json:"mode"`
-	IncludeSubDomains bool   `json:"include_subdomains"`
-	Policy            string `json:"policy"`
+	Name              string     `json:"name"`
+	Mode              string     `json:"mode"`
+	IncludeSubDomains bool       `json:"include_subdomains"`
+	Policy            PolicyType `json:"policy"`
 }
 
 // IndexedEntries is case-insensitive index of
