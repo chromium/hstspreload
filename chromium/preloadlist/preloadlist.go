@@ -70,6 +70,8 @@ const (
 	// domains under a public suffix that have been preloaded at the request of the the public suffix owner
 	// (e.g. the registry for the TLD).
 	PublicSuffixRequested = "public-suffix-requested"
+	// domains with an unspecified policy type
+	UnspecifiedPolicyType = ""
 )
 
 // A Entry contains the data from an entry in the Chromium
