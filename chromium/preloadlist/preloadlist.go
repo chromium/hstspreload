@@ -47,15 +47,15 @@ type PreloadList struct {
 	Entries []Entry `json:"entries"`
 }
 
-// PolicyType represents the policy under which the domain was added to the preload list
+// PolicyType represents the policy under which the domain was added to the preload list.
 type PolicyType string 
 
 // Possible PolicyType values are as defined by 
 // https://source.chromium.org/chromium/chromium/src/+/main:net/http/transport_security_state_static.json
 const (
-	// Domains with an unspecified policy type
+	// Domains with an unspecified policy type.
 	UnspecifiedPolicyType = ""
-	// test domains
+	// Test domains.
 	Test PolicyType = "test"
 	// Google-owned sites.
 	Google = "google"
