@@ -1,7 +1,6 @@
 package preloadlist
 
 import (
-	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -139,7 +138,7 @@ var (
 )
 
 func TestNewFromFile(t *testing.T) {
-	f, err := ioutil.TempFile("", "preloadlist-test")
+	f, err := os.CreateTemp("", "preloadlist-test")
 	if err != nil {
 		t.Fatal(err)
 	}

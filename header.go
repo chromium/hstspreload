@@ -212,12 +212,6 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
 			"No max-age directice",
 			"Header requirement error: Header must contain a valid `max-age` directive.")
 
-	case hstsHeader.MaxAge.Seconds < 0:
-		issues = issues.addErrorf(
-			"internal.header.preloadable.max_age.negative",
-			"Negative max-age",
-			"Encountered an HSTSHeader with a negative max-age that does not equal MaxAgeNotPresent: %d", hstsHeader.MaxAge.Seconds)
-
 	case hstsHeader.MaxAge.Seconds < hstsMinimumMaxAge:
 		errorStr := fmt.Sprintf(
 			"The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=%d.",
