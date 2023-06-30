@@ -69,12 +69,6 @@ func TestHeadersEqual(t *testing.T) {
 	}
 }
 
-func expectHeadersEqual(t *testing.T, expected HSTSHeader, actual HSTSHeader) {
-	if !headersEqual(actual, expected) {
-		t.Errorf(headersShouldBeEqual, actual, expected)
-	}
-}
-
 var parseHeaderStringTests = []struct {
 	description        string
 	header             string
