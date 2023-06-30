@@ -265,6 +265,10 @@ var preloadableDomainTests = []preloadableDomainTest{
 }
 
 func TestPreloadableDomainAndRemovableDomain(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
