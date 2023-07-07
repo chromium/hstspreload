@@ -7,10 +7,12 @@ import (
 )
 
 const (
-	oneYear  = 86400 * 365
-	tenYears = 10 * oneYear
+	eighteenWeeks = 86400 * 126
+	oneYear       = 86400 * 365
+	tenYears      = 10 * oneYear
 
 	hstsMinimumMaxAge = oneYear
+	hstsOldMaxAge     = eighteenWeeks
 )
 
 // MaxAge holds the max-age of an HSTS header in seconds.
@@ -202,8 +204,18 @@ func preloadableHeaderSubDomains(hstsHeader HSTSHeader) Issues {
 	return issues
 }
 
-func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
+func preloadableHeaderMaxAge(hstsHeader HSTSHeader, policy string) Issues {
 	issues := Issues{}
+
+	var maxAge int
+	var ageName string
+	if policy == "bulk-1-year" {
+		maxAge = hstsMinimumMaxAge
+		ageName = "1 year"
+	} else {
+		maxAge = hstsOldMaxAge
+		ageName = "18 weeks"
+	}
 
 	switch {
 	case hstsHeader.MaxAge == nil:
@@ -212,10 +224,16 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
 			"No max-age directice",
 			"Header requirement error: Header must contain a valid `max-age` directive.")
 
-	case hstsHeader.MaxAge.Seconds < hstsMinimumMaxAge:
+	case hstsHeader.MaxAge.Seconds < 0:
+		issues = issues.addErrorf(
+			"internal.header.preloadable.max_age.negative",
+			"Negative max-age",
+			"Encountered an HSTSHeader with a negative max-age that does not equal MaxAgeNotPresent: %d", hstsHeader.MaxAge.Seconds)
+
+	case hstsHeader.MaxAge.Seconds < uint64(maxAge):
 		errorStr := fmt.Sprintf(
-			"The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=%d.",
-			hstsHeader.MaxAge.Seconds,
+			"The max-age must be at least %d seconds (≈ %s), but the header currently only has max-age=%d.",
+			maxAge, ageName, hstsHeader.MaxAge.Seconds,
 		)
 		if hstsHeader.MaxAge.Seconds == 0 {
 			errorStr += " If you are trying to remove this domain from the preload list, please visit https://hstspreload.org/removal/"
@@ -252,12 +270,12 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
 // documentation for Issues.
 //
 // Most of the time, you'll probably want to use PreloadableHeaderString() instead.
-func PreloadableHeader(hstsHeader HSTSHeader) Issues {
+func PreloadableHeader(hstsHeader HSTSHeader, policy string) Issues {
 	issues := Issues{}
 
 	issues = combineIssues(issues, preloadableHeaderSubDomains(hstsHeader))
 	issues = combineIssues(issues, preloadableHeaderPreload(hstsHeader))
-	issues = combineIssues(issues, preloadableHeaderMaxAge(hstsHeader))
+	issues = combineIssues(issues, preloadableHeaderMaxAge(hstsHeader, policy))
 	return issues
 }
 
@@ -296,7 +314,12 @@ func RemovableHeader(hstsHeader HSTSHeader) Issues {
 // documentation for Issues.
 func PreloadableHeaderString(headerString string) Issues {
 	hstsHeader, issues := ParseHeaderString(headerString)
-	return combineIssues(issues, PreloadableHeader(hstsHeader))
+	return combineIssues(issues, PreloadableHeader(hstsHeader, "bulk-1-year"))
+}
+
+func EligibleHeaderString(headerString string, policy string) Issues {
+	hstsHeader, issues := ParseHeaderString(headerString)
+	return combineIssues(issues, PreloadableHeader(hstsHeader, policy))
 }
 
 // RemovableHeaderString is a convenience function that calls

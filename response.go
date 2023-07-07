@@ -37,6 +37,16 @@ func checkResponse(resp *http.Response, headerCondition func(string) Issues) (he
 	return header, combineIssues(issues, headerCondition(*header))
 }
 
+// checkResponse with a policy string
+func checkPreloadableResponse(resp *http.Response, headerCondition func(string, string) Issues, policy string) (header *string, issues Issues) {
+	header, issues = checkSingleHeader(resp)
+	if len(issues.Errors) > 0 {
+		return nil, issues
+	}
+
+	return header, combineIssues(issues, headerCondition(*header, policy))
+}
+
 // PreloadableResponse checks whether an resp has a single HSTS header that
 // passes the preload requirements.
 //
@@ -46,6 +56,17 @@ func checkResponse(resp *http.Response, headerCondition func(string) Issues) (he
 // documentation for Issues.
 func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
 	return checkResponse(resp, PreloadableHeaderString)
+}
+
+// EligibleResponse checks whether an resp has a single HSTS header that
+// passes the preload requirements.
+//
+// Iff a single HSTS header was received, `header` contains its value, else
+// `header` is `nil`.
+// To interpret `issues`, see the list of conventions in the
+// documentation for Issues.
+func EligibleResponse(resp *http.Response, policy string) (header *string, issues Issues) {
+	return checkPreloadableResponse(resp, EligibleHeaderString, policy)
 }
 
 // RemovableResponse checks whether an resp has a single HSTS header that

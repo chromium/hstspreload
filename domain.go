@@ -46,13 +46,32 @@ var allowedWWWeTLDs = map[string]bool{
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableDomain(domain string) (header *string, issues Issues) {
-	header, issues, _ = PreloadableDomainResponse(domain)
+	header, issues, _ = EligibleDomainResponse(domain, "bulk-1-year")
 	return header, issues
 }
 
-// PreloadableDomainResponse is like PreloadableDomain, but also returns
+// EligibleDomain checks whether the domain passes HSTS preload
+// requirements for Chromium when it was add. This includes:
+//
+// - Serving a single HSTS header that passes header requirements.
+//
+// - Using TLS settings that will not cause new problems for
+// Chromium/Chrome users. (Example of a new problem: a missing intermediate certificate
+// will turn an error page from overrideable to non-overridable on
+// some mobile devices.)
+//
+// Iff a single HSTS header was received, `header` contains its value, else
+// `header` is `nil`.
+// To interpret `issues`, see the list of conventions in the
+// documentation for Issues.
+func EligibleDomain(domain string, policy string) (header *string, issues Issues) {
+	header, issues, _ = EligibleDomainResponse(domain, policy)
+	return header, issues
+}
+
+// EligibleDomainResponse is like EligibleDomain, but also returns
 // the initial response over HTTPS.
-func PreloadableDomainResponse(domain string) (header *string, issues Issues, resp *http.Response) {
+func EligibleDomainResponse(domain string, policy string) (header *string, issues Issues, resp *http.Response) {
 	// Check domain format issues first, since we can report something
 	// useful even if the other checks fail.
 	issues = combineIssues(issues, checkDomainFormat(domain))
@@ -81,7 +100,7 @@ func PreloadableDomainResponse(domain string) (header *string, issues Issues, re
 		// PreloadableResponse
 		go func() {
 			var preloadableIssues Issues
-			header, preloadableIssues = PreloadableResponse(resp)
+			header, preloadableIssues = EligibleResponse(resp, policy)
 			preloadableResponse <- preloadableIssues
 		}()
 
