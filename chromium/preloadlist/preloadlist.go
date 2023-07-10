@@ -54,9 +54,9 @@ type PolicyType string
 // https://source.chromium.org/chromium/chromium/src/+/main:net/http/transport_security_state_static.json
 const (
 	// Domains with an unspecified policy type.
-	UnspecifiedPolicyType = ""
+	UnspecifiedPolicyType PolicyType = ""
 	// Test domains.
-	Test PolicyType = "test"
+	Test = "test"
 	// Google-owned sites.
 	Google = "google"
 	// Entries without includeSubdomains or with HPKP.
