@@ -436,6 +436,162 @@ func TestPreloadableHeaderString(t *testing.T) {
 	}
 }
 
+// Eligible Domain tests
+var eligibleHeaderStringTests = []struct {
+	description    string
+	header         string
+	expectedIssues Issues
+	policy         string
+}{
+
+	/******** no errors, no warnings ********/
+
+	{
+		"no issues",
+		"max-age=10886400; includeSubDomains; preload",
+		Issues{},
+		"bulk-18-weeks",
+	},
+
+	/******** no errors, warnings only ********/
+
+	{
+		"max-age > 10 years",
+		"max-age=315360001; preload; includeSubDomains",
+		Issues{Warnings: []Issue{{
+			Code:    "header.preloadable.max_age.over_10_years",
+			Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
+		}}},
+		"bulk-1-year",
+	},
+
+	/******** errors only, no warnings ********/
+
+	{
+		"empty",
+		"",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.include_sub_domains.missing"},
+				{Code: "header.preloadable.preload.missing"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+			Warnings: []Issue{{Code: "header.parse.empty"}},
+		},
+		"bulk-18-weeks",
+	},
+	{
+		"missing preload",
+		"includeSubDomains; max-age=10886400",
+		Issues{Errors: []Issue{{Code: "header.preloadable.preload.missing"}}},
+		"bulk-18-weeks",
+	},
+	{
+		"missing includeSubdomains",
+		"preload; max-age=10886400",
+		Issues{Errors: []Issue{{Code: "header.preloadable.include_sub_domains.missing"}}},
+		"bulk-18-weeks",
+	},
+	{
+		"missing max-age",
+		"includeSubDomains; preload",
+		Issues{Errors: []Issue{{Code: "header.preloadable.max_age.missing"}}},
+		"bulk-18-weeks",
+	},
+	{
+		"only preload",
+		"preload",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.include_sub_domains.missing"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+		},
+		"bulk-18-weeks",
+	},
+	{
+		"only includeSubdomains",
+		"includeSubDomains",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.preload.missing"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+		},
+		"bulk-18-weeks",
+	},
+	{
+		"only max-age",
+		"max-age=123456789",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.include_sub_domains.missing"},
+				{Code: "header.preloadable.preload.missing"},
+			},
+		},
+		"bulk-1-year",
+	},
+	{
+		"max-age without value",
+		"includeSubDomains; preload; max-age",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.parse.invalid.max_age.no_value"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+		},
+		"bulk-18-weeks",
+	},
+	{
+		"maxAge=0", // Give information about what to do if you want to remove HSTS.
+		"includeSubDomains; preload; max-age=0",
+		Issues{Errors: []Issue{{Code: "header.preloadable.max_age.zero"}}},
+		"bulk-18-weeks",
+	},
+	{
+		"maxAge=100",
+		"includeSubDomains; preload; max-age=100",
+		Issues{Errors: []Issue{{
+			Code:    "header.preloadable.max_age.below_18_weeks",
+			Message: "The max-age must be at least 10886400 seconds (≈ 18 weeks), but the header currently only has max-age=100.",
+		}}},
+		"bulk-18-weeks",
+	},
+	{
+		"maxAge=10886400",
+		"includeSubDomains; preload; max-age=10886400",
+		Issues{Errors: []Issue{{
+			Code:    "header.preloadable.max_age.below_1_year",
+			Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=10886400.",
+		}}},
+		"bulk-1-year",
+	},
+
+	/******** errors and warnings ********/
+
+	{
+		"missing preload, >10 years",
+		"max-age=315360001; includeSubDomains",
+		Issues{
+			Errors: []Issue{{Code: "header.preloadable.preload.missing"}},
+			Warnings: []Issue{{
+				Code:    "header.preloadable.max_age.over_10_years",
+				Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
+			}},
+		},
+		"bulk-1-year",
+	},
+}
+
+func TestEligibleHeaderString(t *testing.T) {
+	for _, tt := range eligibleHeaderStringTests {
+		issues := EligibleHeaderString(tt.header, tt.policy)
+		if !issues.Match(tt.expectedIssues) {
+			t.Errorf("[%s] "+issuesShouldMatch, tt.description, issues, tt.expectedIssues)
+		}
+	}
+}
+
 var removableHeaderStringTests = []struct {
 	description    string
 	header         string
