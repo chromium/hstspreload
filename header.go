@@ -324,6 +324,12 @@ func PreloadableHeaderString(headerString string) Issues {
 	return combineIssues(issues, PreloadableHeader(hstsHeader))
 }
 
+// EligibleHeaderString is a convenience function that calls
+// ParseHeaderString() and then calls on EligibleHeader() the parsed
+// header. It returns all issues from both calls, combined.
+//
+// To interpret the result, see the list of conventions in the
+// documentation for Issues.
 func EligibleHeaderString(headerString string, policy string) Issues {
 	hstsHeader, issues := ParseHeaderString(headerString)
 	return combineIssues(issues, EligibleHeader(hstsHeader, policy))
