@@ -147,3 +147,103 @@ func TestPreloabableResponseAndRemovableResponse(t *testing.T) {
 		}
 	}
 }
+
+// Eligible Response Tests
+
+var eligibleResponseTests = []struct {
+	description    string
+	hstsHeaders    []string
+	policy         string
+	expectedIssues Issues
+}{
+	{
+		"good header",
+		[]string{"max-age=10886400; includeSubDomains; preload"},
+		"bulk-18-weeks",
+		Issues{},
+	},
+	{
+		"missing preload",
+		[]string{"max-age=10886400; includeSubDomains"},
+		"bulk-18-weeks",
+		Issues{Errors: []Issue{{Code: "header.preloadable.preload.missing"}}},
+	},
+	{
+		"missing includeSubDomains",
+		[]string{"preload; max-age=10886400"},
+		"bulk-18-weeks",
+		Issues{Errors: []Issue{{Code: "header.preloadable.include_sub_domains.missing"}}},
+	},
+	{
+		"single header, multiple errors",
+		[]string{"includeSubDomains; max-age=100"},
+		"bulk-18-weeks",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.preload.missing"},
+				{
+					Code:    "header.preloadable.max_age.below_18_weeks",
+					Message: "The max-age must be at least 10886400 seconds (≈ 18 weeks), but the header currently only has max-age=100.",
+				},
+			},
+		},
+	},
+	{
+		"empty header",
+		[]string{""},
+		"bulk-18-weeks",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.include_sub_domains.missing", Summary: "No includeSubDomains directive", Message: "The header must contain the `includeSubDomains` directive."},
+				{Code: "header.preloadable.preload.missing", Summary: "No preload directive", Message: "The header must contain the `preload` directive."},
+				{Code: "header.preloadable.max_age.missing", Summary: "No max-age directice", Message: "Header requirement error: Header must contain a valid `max-age` directive."},
+			},
+			Warnings: []Issue{{Code: "header.parse.empty", Summary: "Empty Header", Message: "The HSTS header is empty."}},
+		},
+	},
+	{
+		"missing header",
+		[]string{},
+		"bulk-18-weeks",
+		Issues{Errors: []Issue{{Code: "response.no_header"}}},
+	},
+	{
+		"multiple headers",
+		[]string{"max-age=10", "max-age=20", "max-age=30"},
+		"bulk-18-weeks",
+		Issues{Errors: []Issue{{Code: "response.multiple_headers"}}},
+	},
+}
+
+func TestEligibleResponse(t *testing.T) {
+	for _, tt := range eligibleResponseTests {
+
+		resp := &http.Response{}
+		resp.Header = http.Header{}
+
+		key := http.CanonicalHeaderKey("Strict-Transport-Security")
+		for _, h := range tt.hstsHeaders {
+			resp.Header.Add(key, h)
+		}
+
+		header, issues := EligibleResponse(resp, tt.policy)
+
+		if len(tt.hstsHeaders) == 1 {
+			if header == nil {
+				t.Errorf("[%s] Did not receive exactly one HSTS header", tt.description)
+			} else if *header != tt.hstsHeaders[0] {
+				t.Errorf(`[%s] Did not receive expected header.
+			Actual: "%v"
+			Expected: "%v"`, tt.description, *header, tt.hstsHeaders[0])
+			}
+		} else {
+			if header != nil {
+				t.Errorf("[%s] Did not expect a header, but received `%s`", tt.description, *header)
+			}
+		}
+
+		if !issues.Match(tt.expectedIssues) {
+			t.Errorf("[%s] "+issuesShouldMatch, tt.description, issues, tt.expectedIssues)
+		}
+	}
+}
