@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 func checkSingleHeader(resp *http.Response) (header *string, issues Issues) {
@@ -28,17 +30,7 @@ func checkSingleHeader(resp *http.Response) (header *string, issues Issues) {
 	return &hstsHeaders[0], issues
 }
 
-func checkResponse(resp *http.Response, headerCondition func(string) Issues) (header *string, issues Issues) {
-	header, issues = checkSingleHeader(resp)
-	if len(issues.Errors) > 0 {
-		return nil, issues
-	}
-
-	return header, combineIssues(issues, headerCondition(*header))
-}
-
-// checkResponse with a policy string
-func checkEligibleResponse(resp *http.Response, headerCondition func(string, string) Issues, policy string) (header *string, issues Issues) {
+func checkResponse(resp *http.Response, headerCondition func(string, preloadlist.PolicyType) Issues, policy preloadlist.PolicyType) (header *string, issues Issues) {
 	header, issues = checkSingleHeader(resp)
 	if len(issues.Errors) > 0 {
 		return nil, issues
@@ -54,8 +46,14 @@ func checkEligibleResponse(resp *http.Response, headerCondition func(string, str
 // `header` is `nil`.
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
-func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
-	return checkResponse(resp, PreloadableHeaderString)
+func PreloadableResponse(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues) {
+	return checkResponse(resp, PreloadableHeaderStringWrapper, policy)
+}
+
+// PreloadableResponseWrapper is a wrapper function for PreloadableResponse that
+// does not require a policy
+func PreloadableResponseWrapper(resp *http.Response) (header *string, issues Issues){
+	return PreloadableResponse(resp, "bulk-1-year")
 }
 
 // EligibleResponse checks whether an resp has a single HSTS header that
@@ -65,8 +63,8 @@ func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
 // `header` is `nil`.
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
-func EligibleResponse(resp *http.Response, policy string) (header *string, issues Issues) {
-	return checkEligibleResponse(resp, EligibleHeaderString, policy)
+func EligibleResponse(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues) {
+	return checkResponse(resp, EligibleHeaderString, policy)
 }
 
 // RemovableResponse checks whether an resp has a single HSTS header that
@@ -76,8 +74,14 @@ func EligibleResponse(resp *http.Response, policy string) (header *string, issue
 // `header` is `nil`.
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
-func RemovableResponse(resp *http.Response) (header *string, issues Issues) {
-	return checkResponse(resp, RemovableHeaderString)
+func RemovableResponse(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues) {
+	return checkResponse(resp, RemovableHeaderStringWrapper, policy)
+}
+
+// RemovableResponseWrapper is a wrapper function for RemovableResponse that
+// does not require a policy
+func RemovableResponseWrapper(resp *http.Response) (header *string, issues Issues) {
+	return RemovableResponse(resp, "bulk-1-year")
 }
 
 // getFirstResponse makes a GET request to `initialURL` without redirecting.

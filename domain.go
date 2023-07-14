@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 	"golang.org/x/net/publicsuffix"
 )
 
@@ -64,14 +65,14 @@ func PreloadableDomain(domain string) (header *string, issues Issues) {
 // `header` is `nil`.
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
-func EligibleDomain(domain string, policy string) (header *string, issues Issues) {
+func EligibleDomain(domain string, policy preloadlist.PolicyType) (header *string, issues Issues) {
 	header, issues, _ = EligibleDomainResponse(domain, policy)
 	return header, issues
 }
 
 // EligibleDomainResponse is like EligibleDomain, but also returns
 // the initial response over HTTPS.
-func EligibleDomainResponse(domain string, policy string) (header *string, issues Issues, resp *http.Response) {
+func EligibleDomainResponse(domain string, policy preloadlist.PolicyType) (header *string, issues Issues, resp *http.Response) {
 	// Check domain format issues first, since we can report something
 	// useful even if the other checks fail.
 	issues = combineIssues(issues, checkDomainFormat(domain))
@@ -163,7 +164,7 @@ func RemovableDomain(domain string) (header *string, issues Issues) {
 	issues = combineIssues(issues, respIssues)
 	if len(respIssues.Errors) == 0 {
 		var removableIssues Issues
-		header, removableIssues = RemovableResponse(resp)
+		header, removableIssues = RemovableResponse(resp, "bulk-1-year")
 		issues = combineIssues(issues, removableIssues)
 	}
 
