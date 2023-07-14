@@ -53,7 +53,7 @@ func PreloadableResponse(resp *http.Response, policy preloadlist.PolicyType) (he
 // PreloadableResponseWrapper is a wrapper function for PreloadableResponse that
 // does not require a policy
 func PreloadableResponseWrapper(resp *http.Response) (header *string, issues Issues){
-	return PreloadableResponse(resp, "bulk-1-year")
+	return PreloadableResponse(resp, Bulk1Year)
 }
 
 // EligibleResponse checks whether an resp has a single HSTS header that
@@ -81,7 +81,7 @@ func RemovableResponse(resp *http.Response, policy preloadlist.PolicyType) (head
 // RemovableResponseWrapper is a wrapper function for RemovableResponse that
 // does not require a policy
 func RemovableResponseWrapper(resp *http.Response) (header *string, issues Issues) {
-	return RemovableResponse(resp, "bulk-1-year")
+	return RemovableResponse(resp, Bulk1Year)
 }
 
 // getFirstResponse makes a GET request to `initialURL` without redirecting.

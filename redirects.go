@@ -117,7 +117,7 @@ func preloadableHTTPRedirectsURL(initialURL string, domain string) (general, fir
 				err,
 			)
 		}
-		_, redirectHSTSIssues := PreloadableResponse(resp, "bulk-1-year")
+		_, redirectHSTSIssues := PreloadableResponse(resp, Bulk1Year)
 		if len(redirectHSTSIssues.Errors) > 0 {
 			firstRedirectHSTS = firstRedirectHSTS.addErrorf(
 				IssueCode("redirects.http.first_redirect.no_hsts"),

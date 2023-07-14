@@ -15,6 +15,9 @@ const (
 	// dialTimeout specifies the amount of time that TCP or TLS connections
 	// can take to complete.
 	dialTimeout = 10 * time.Second
+
+	Bulk1Year = "bulk-1-year"
+	Bulk18Weeks = "bulk-18-weeks"
 )
 
 // dialer is a global net.Dialer that's used whenever making TLS connections in
@@ -47,7 +50,7 @@ var allowedWWWeTLDs = map[string]bool{
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableDomain(domain string) (header *string, issues Issues) {
-	header, issues, _ = EligibleDomainResponse(domain, "bulk-1-year")
+	header, issues, _ = EligibleDomainResponse(domain, Bulk1Year)
 	return header, issues
 }
 
@@ -164,7 +167,7 @@ func RemovableDomain(domain string) (header *string, issues Issues) {
 	issues = combineIssues(issues, respIssues)
 	if len(respIssues.Errors) == 0 {
 		var removableIssues Issues
-		header, removableIssues = RemovableResponse(resp, "bulk-1-year")
+		header, removableIssues = RemovableResponse(resp, Bulk1Year)
 		issues = combineIssues(issues, removableIssues)
 	}
 

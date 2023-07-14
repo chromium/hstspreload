@@ -36,7 +36,7 @@ type Result struct {
 func worker(in chan string, out chan Result) {
 	for d := range in {
 
-		header, issues, resp := hstspreload.EligibleDomainResponse(d, "bulk-1-year")
+		header, issues, resp := hstspreload.EligibleDomainResponse(d, hstspreload.Bulk1Year)
 
 		r := Result{
 			Domain: d,
