@@ -46,14 +46,8 @@ func checkResponse(resp *http.Response, headerCondition func(string, preloadlist
 // `header` is `nil`.
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
-func PreloadableResponse(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues) {
-	return checkResponse(resp, PreloadableHeaderStringWrapper, policy)
-}
-
-// PreloadableResponseWrapper is a wrapper function for PreloadableResponse that
-// does not require a policy
-func PreloadableResponseWrapper(resp *http.Response) (header *string, issues Issues){
-	return PreloadableResponse(resp, Bulk1Year)
+func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
+	return checkResponse(resp, PreloadableHeaderStringWrapper, preloadlist.Bulk1Year)
 }
 
 // EligibleResponse checks whether an resp has a single HSTS header that
@@ -67,6 +61,19 @@ func EligibleResponse(resp *http.Response, policy preloadlist.PolicyType) (heade
 	return checkResponse(resp, EligibleHeaderString, policy)
 }
 
+// EligibleResponse1Year calls EligibleResponse with a policy of 
+// "bulk-1-year". Function exists for testing purposes
+func EligibleResponse1Year(resp *http.Response) (header *string, issues Issues) {
+	return EligibleResponse(resp, preloadlist.Bulk1Year)
+}
+
+// EligibleResponse18Weeks calls EligibleResonse with a policy of
+// "bulk-18-weeks". Function exists for testing purposes
+func EligibleResponse18Weeks(resp *http.Response) (header *string, issues Issues) {
+	return EligibleResponse(resp, preloadlist.Bulk18Weeks)
+}
+
+
 // RemovableResponse checks whether an resp has a single HSTS header that
 // matches the requirements for removal from the HSTS preload list.
 //
@@ -74,14 +81,8 @@ func EligibleResponse(resp *http.Response, policy preloadlist.PolicyType) (heade
 // `header` is `nil`.
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
-func RemovableResponse(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues) {
-	return checkResponse(resp, RemovableHeaderStringWrapper, policy)
-}
-
-// RemovableResponseWrapper is a wrapper function for RemovableResponse that
-// does not require a policy
-func RemovableResponseWrapper(resp *http.Response) (header *string, issues Issues) {
-	return RemovableResponse(resp, Bulk1Year)
+func RemovableResponse(resp *http.Response) (header *string, issues Issues) {
+	return checkResponse(resp, RemovableHeaderStringWrapper, preloadlist.Bulk1Year)
 }
 
 // getFirstResponse makes a GET request to `initialURL` without redirecting.

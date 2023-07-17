@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/chromium/hstspreload"
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 const (
@@ -36,7 +37,7 @@ type Result struct {
 func worker(in chan string, out chan Result) {
 	for d := range in {
 
-		header, issues, resp := hstspreload.EligibleDomainResponse(d, hstspreload.Bulk1Year)
+		header, issues, resp := hstspreload.EligibleDomainResponse(d, preloadlist.Bulk1Year)
 
 		r := Result{
 			Domain: d,

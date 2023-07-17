@@ -452,13 +452,13 @@ var eligibleHeaderStringTests = []struct {
 		"no issues, policy: 1 year",
 		"max-age=31536000; includeSubDomains; preload",
 		Issues{},
-		"bulk-18-weeks",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"no issues, policy: 18 weeks",
 		"max-age=10886400; includeSubDomains; preload",
 		Issues{},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 
 	/******** no errors, warnings only ********/
@@ -470,7 +470,7 @@ var eligibleHeaderStringTests = []struct {
 			Code:    "header.preloadable.max_age.over_10_years",
 			Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
 		}}},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"max-age > 10 years, policy: 18 weeks",
@@ -479,7 +479,7 @@ var eligibleHeaderStringTests = []struct {
 			Code:    "header.preloadable.max_age.over_10_years",
 			Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
 		}}},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 
 	/******** errors only, no warnings ********/
@@ -495,7 +495,7 @@ var eligibleHeaderStringTests = []struct {
 			},
 			Warnings: []Issue{{Code: "header.parse.empty"}},
 		},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"empty, policy: 18 weeks",
@@ -508,7 +508,7 @@ var eligibleHeaderStringTests = []struct {
 			},
 			Warnings: []Issue{{Code: "header.parse.empty"}},
 		},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 	{
 		"max-age without value, policy: 1 year",
@@ -519,7 +519,7 @@ var eligibleHeaderStringTests = []struct {
 				{Code: "header.preloadable.max_age.missing"},
 			},
 		},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"max-age without value, policy: 18 weeks",
@@ -530,19 +530,19 @@ var eligibleHeaderStringTests = []struct {
 				{Code: "header.preloadable.max_age.missing"},
 			},
 		},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 	{
 		"maxAge=0, policy: 1 year", // Give information about what to do if you want to remove HSTS.
 		"includeSubDomains; preload; max-age=0",
 		Issues{Errors: []Issue{{Code: "header.preloadable.max_age.zero"}}},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"maxAge=0, policy: 18 weeks", // Give information about what to do if you want to remove HSTS.
 		"includeSubDomains; preload; max-age=0",
 		Issues{Errors: []Issue{{Code: "header.preloadable.max_age.zero"}}},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 	{
 		"maxAge=100, policy: 1 year",
@@ -551,7 +551,7 @@ var eligibleHeaderStringTests = []struct {
 			Code:    "header.preloadable.max_age.below_1_year",
 			Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=100.",
 		}}},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"maxAge=100, policy: 18 weeks",
@@ -560,7 +560,7 @@ var eligibleHeaderStringTests = []struct {
 			Code:    "header.preloadable.max_age.below_18_weeks",
 			Message: "The max-age must be at least 10886400 seconds (≈ 18 weeks), but the header currently only has max-age=100.",
 		}}},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 	{
 		"maxAge=10886400, policy: 1 year",
@@ -569,7 +569,7 @@ var eligibleHeaderStringTests = []struct {
 			Code:    "header.preloadable.max_age.below_1_year",
 			Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=10886400.",
 		}}},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 
 	/******** errors and warnings ********/
@@ -584,7 +584,7 @@ var eligibleHeaderStringTests = []struct {
 				Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
 			}},
 		},
-		"bulk-1-year",
+		preloadlist.Bulk1Year,
 	},
 	{
 		"missing preload, >10 years, policy: 18 weeks",
@@ -596,7 +596,7 @@ var eligibleHeaderStringTests = []struct {
 				Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
 			}},
 		},
-		"bulk-18-weeks",
+		preloadlist.Bulk18Weeks,
 	},
 }
 

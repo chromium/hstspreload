@@ -15,9 +15,6 @@ const (
 	// dialTimeout specifies the amount of time that TCP or TLS connections
 	// can take to complete.
 	dialTimeout = 10 * time.Second
-
-	Bulk1Year = "bulk-1-year"
-	Bulk18Weeks = "bulk-18-weeks"
 )
 
 // dialer is a global net.Dialer that's used whenever making TLS connections in
@@ -50,24 +47,13 @@ var allowedWWWeTLDs = map[string]bool{
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableDomain(domain string) (header *string, issues Issues) {
-	header, issues, _ = EligibleDomainResponse(domain, Bulk1Year)
+	header, issues, _ = EligibleDomainResponse(domain, preloadlist.Bulk1Year)
 	return header, issues
 }
 
 // EligibleDomain checks whether the domain passes HSTS preload
-// requirements for Chromium when it was add. This includes:
-//
-// - Serving a single HSTS header that passes header requirements.
-//
-// - Using TLS settings that will not cause new problems for
-// Chromium/Chrome users. (Example of a new problem: a missing intermediate certificate
-// will turn an error page from overrideable to non-overridable on
-// some mobile devices.)
-//
-// Iff a single HSTS header was received, `header` contains its value, else
-// `header` is `nil`.
-// To interpret `issues`, see the list of conventions in the
-// documentation for Issues.
+// requirements for Chromium when it was added using the 
+// requirements from PreloadableDomain
 func EligibleDomain(domain string, policy preloadlist.PolicyType) (header *string, issues Issues) {
 	header, issues, _ = EligibleDomainResponse(domain, policy)
 	return header, issues
@@ -167,7 +153,7 @@ func RemovableDomain(domain string) (header *string, issues Issues) {
 	issues = combineIssues(issues, respIssues)
 	if len(respIssues.Errors) == 0 {
 		var removableIssues Issues
-		header, removableIssues = RemovableResponse(resp, Bulk1Year)
+		header, removableIssues = RemovableResponse(resp)
 		issues = combineIssues(issues, removableIssues)
 	}
 

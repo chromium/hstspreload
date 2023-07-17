@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 /******** Examples. ********/
@@ -13,7 +12,7 @@ import (
 func ExamplePreloadableResponse() {
 	resp, err := http.Get("localhost:8080")
 	if err != nil {
-		header, issues := PreloadableResponse(resp, "bulk-1-year")
+		header, issues := PreloadableResponse(resp)
 		if header != nil {
 			fmt.Printf("Header: %s", *header)
 		}
@@ -24,11 +23,10 @@ func ExamplePreloadableResponse() {
 /******** Response tests. ********/
 
 var responseTests = []struct {
-	function       func(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues)
+	function       func(resp *http.Response) (header *string, issues Issues)
 	description    string
 	hstsHeaders    []string
 	expectedIssues Issues
-	policy         preloadlist.PolicyType
 }{
 
 	/******** PreloadableResponse() ********/
@@ -38,21 +36,18 @@ var responseTests = []struct {
 		"good header",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
-		"bulk-1-year",
 	},
 	{
 		PreloadableResponse,
 		"missing preload",
 		[]string{"max-age=31536000; includeSubDomains"},
 		Issues{Errors: []Issue{{Code: "header.preloadable.preload.missing"}}},
-		"bulk-1-year",
 	},
 	{
 		PreloadableResponse,
 		"missing includeSubDomains",
 		[]string{"preload; max-age=31536000"},
 		Issues{Errors: []Issue{{Code: "header.preloadable.include_sub_domains.missing"}}},
-		"bulk-1-year",
 	},
 	{
 		PreloadableResponse,
@@ -67,7 +62,6 @@ var responseTests = []struct {
 				},
 			},
 		},
-		"bulk-1-year",
 	},
 	{
 		PreloadableResponse,
@@ -81,21 +75,18 @@ var responseTests = []struct {
 			},
 			Warnings: []Issue{{Code: "header.parse.empty", Summary: "Empty Header", Message: "The HSTS header is empty."}},
 		},
-		"bulk-1-year",
 	},
 	{
 		PreloadableResponse,
 		"missing header",
 		[]string{},
 		Issues{Errors: []Issue{{Code: "response.no_header"}}},
-		"bulk-1-year",
 	},
 	{
 		PreloadableResponse,
 		"multiple headers",
 		[]string{"max-age=10", "max-age=20", "max-age=30"},
 		Issues{Errors: []Issue{{Code: "response.multiple_headers"}}},
-		"bulk-1-year",
 	},
 
 	/******** RemovableResponse() ********/
@@ -105,14 +96,12 @@ var responseTests = []struct {
 		"no preload",
 		[]string{"max-age=15768000; includeSubDomains"},
 		Issues{},
-		"bulk-1-year",
 	},
 	{
 		RemovableResponse,
 		"preload present",
 		[]string{"max-age=15768000; includeSubDomains; preload"},
 		Issues{Errors: []Issue{{Code: "header.removable.contains.preload"}}},
-		"bulk-1-year",
 	},
 	{
 		RemovableResponse,
@@ -124,26 +113,23 @@ var responseTests = []struct {
 				{Code: "header.removable.missing.max_age"},
 			},
 		},
-		"bulk-1-year",
 	},
 
 		/******** EligibleResponse() ********/
 	{
-		EligibleResponse,
+		EligibleResponse1Year,
 		"good header 1 year",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
-		"bulk-1-year",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse18Weeks,
 		"good header 18 weeks",
 		[]string{"max-age=10886400; includeSubDomains; preload"},
 		Issues{},
-		"bulk-18-weeks",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse1Year,
 		"single header, multiple errors, 1 year",
 		[]string{"includeSubDomains; max-age=100"},
 		Issues{
@@ -155,10 +141,9 @@ var responseTests = []struct {
 				},
 			},
 		},
-		"bulk-1-year",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse18Weeks,
 		"single header, multiple errors, 18 weeks",
 		[]string{"includeSubDomains; max-age=100"},
 		Issues{
@@ -170,10 +155,9 @@ var responseTests = []struct {
 				},
 			},
 		},
-		"bulk-18-weeks",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse1Year,
 		"18 week max age, 1 year",
 		[]string{"max-age=10886400; includeSubDomains; preload"},
 		Issues{
@@ -184,28 +168,24 @@ var responseTests = []struct {
 				},
 			},
 		},
-		"bulk-1-year",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse18Weeks,
 		"18 week max age, 18 weeks",
 		[]string{"max-age=10886400; includeSubDomains; preload"},
 		Issues{},
-		"bulk-18-weeks",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse1Year,
 		"1 year max age, 1 year",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
-		"bulk-1-year",
 	},
 	{
-		EligibleResponse,
+		EligibleResponse18Weeks,
 		"1 year max age, 18 weeks",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
-		"bulk-18-weeks",
 	},
 }
 
@@ -220,7 +200,7 @@ func TestPreloabableResponseRemovableAndEligibleResponse(t *testing.T) {
 			resp.Header.Add(key, h)
 		}
 
-		header, issues := tt.function(resp, tt.policy)
+		header, issues := tt.function(resp)
 
 		if len(tt.hstsHeaders) == 1 {
 			if header == nil {

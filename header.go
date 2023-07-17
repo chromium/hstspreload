@@ -210,7 +210,7 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader, policy preloadlist.PolicyTyp
 
 	maxAge := hstsMinimumMaxAge
 	ageName := "1 year"
-	if policy == Bulk18Weeks {
+	if policy == preloadlist.Bulk18Weeks {
 		maxAge = eighteenWeeks
 		ageName = "18 weeks"
 	} 
@@ -234,7 +234,7 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader, policy preloadlist.PolicyTyp
 				"Max-age is 0",
 				errorStr,
 			)
-		} else if policy == Bulk18Weeks {
+		} else if policy == preloadlist.Bulk18Weeks {
 			issues = issues.addErrorf(
 				"header.preloadable.max_age.below_18_weeks",
 				"Max-age too low",
@@ -269,7 +269,7 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader, policy preloadlist.PolicyTyp
 //
 // Most of the time, you'll probably want to use PreloadableHeaderString() instead.
 func PreloadableHeader(hstsHeader HSTSHeader) Issues {
-	return EligibleHeader(hstsHeader, Bulk1Year)
+	return EligibleHeader(hstsHeader, preloadlist.Bulk1Year)
 }
 
 func EligibleHeader(hstsHeader HSTSHeader, policy preloadlist.PolicyType) Issues {
