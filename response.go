@@ -47,7 +47,7 @@ func checkResponse(resp *http.Response, headerCondition func(string, preloadlist
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
-	return checkResponse(resp, PreloadableHeaderStringWrapper, preloadlist.Bulk1Year)
+	return checkResponse(resp, EligibleHeaderString, preloadlist.Bulk1Year)
 }
 
 // EligibleResponse checks whether an resp has a single HSTS header that
@@ -61,19 +61,6 @@ func EligibleResponse(resp *http.Response, policy preloadlist.PolicyType) (heade
 	return checkResponse(resp, EligibleHeaderString, policy)
 }
 
-// EligibleResponse1Year calls EligibleResponse with a policy of 
-// "bulk-1-year". Function exists for testing purposes
-func EligibleResponse1Year(resp *http.Response) (header *string, issues Issues) {
-	return EligibleResponse(resp, preloadlist.Bulk1Year)
-}
-
-// EligibleResponse18Weeks calls EligibleResonse with a policy of
-// "bulk-18-weeks". Function exists for testing purposes
-func EligibleResponse18Weeks(resp *http.Response) (header *string, issues Issues) {
-	return EligibleResponse(resp, preloadlist.Bulk18Weeks)
-}
-
-
 // RemovableResponse checks whether an resp has a single HSTS header that
 // matches the requirements for removal from the HSTS preload list.
 //
@@ -82,7 +69,7 @@ func EligibleResponse18Weeks(resp *http.Response) (header *string, issues Issues
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func RemovableResponse(resp *http.Response) (header *string, issues Issues) {
-	return checkResponse(resp, RemovableHeaderStringWrapper, preloadlist.Bulk1Year)
+	return checkResponse(resp, func(domain string, policy preloadlist.PolicyType) Issues { return RemovableHeaderString(domain) }, preloadlist.Bulk1Year)
 }
 
 // getFirstResponse makes a GET request to `initialURL` without redirecting.

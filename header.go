@@ -319,12 +319,6 @@ func PreloadableHeaderString(headerString string) Issues {
 	return combineIssues(issues, PreloadableHeader(hstsHeader))
 }
 
-// PreloadableHeaderStringWrapper is a wrapper function for 
-// PreloadableHeaderString which allows for policy as an input.
-func PreloadableHeaderStringWrapper(headerString string, policy preloadlist.PolicyType) Issues {
-	return PreloadableHeaderString(headerString)
-}
-
 // EligibleHeaderString is a convenience function that calls
 // ParseHeaderString() and then calls on EligibleHeader() the parsed
 // header. It returns all issues from both calls, combined.
@@ -353,10 +347,4 @@ func RemovableHeaderString(headerString string) Issues {
 		// Ignore parse warnings for removal testing.
 	}
 	return combineIssues(issues, RemovableHeader(hstsHeader))
-}
-
-// RemovableHeaderStringWrapper is a wrapper function for RemovableHeaderString 
-// which for allows policy as an input.
-func RemovableHeaderStringWrapper(headerString string, policy preloadlist.PolicyType) Issues {
-	return RemovableHeaderString(headerString)
 }

@@ -5,7 +5,21 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
+
+/******** EligibleResponse Wrappers. ********/
+// EligibleResponse1Year calls EligibleResponse with a policy of 
+// "bulk-1-year". Function exists for testing purposes
+func eligibleResponse1Year(resp *http.Response) (header *string, issues Issues) {
+	return EligibleResponse(resp, preloadlist.Bulk1Year)
+}
+
+// EligibleResponse18Weeks calls EligibleResonse with a policy of
+// "bulk-18-weeks". Function exists for testing purposes
+func eligibleResponse18Weeks(resp *http.Response) (header *string, issues Issues) {
+	return EligibleResponse(resp, preloadlist.Bulk18Weeks)
+}
 
 /******** Examples. ********/
 
@@ -117,19 +131,19 @@ var responseTests = []struct {
 
 		/******** EligibleResponse() ********/
 	{
-		EligibleResponse1Year,
+		eligibleResponse1Year,
 		"good header 1 year",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
 	},
 	{
-		EligibleResponse18Weeks,
+		eligibleResponse18Weeks,
 		"good header 18 weeks",
 		[]string{"max-age=10886400; includeSubDomains; preload"},
 		Issues{},
 	},
 	{
-		EligibleResponse1Year,
+		eligibleResponse1Year,
 		"single header, multiple errors, 1 year",
 		[]string{"includeSubDomains; max-age=100"},
 		Issues{
@@ -143,7 +157,7 @@ var responseTests = []struct {
 		},
 	},
 	{
-		EligibleResponse18Weeks,
+		eligibleResponse18Weeks,
 		"single header, multiple errors, 18 weeks",
 		[]string{"includeSubDomains; max-age=100"},
 		Issues{
@@ -157,7 +171,7 @@ var responseTests = []struct {
 		},
 	},
 	{
-		EligibleResponse1Year,
+		eligibleResponse1Year,
 		"18 week max age, 1 year",
 		[]string{"max-age=10886400; includeSubDomains; preload"},
 		Issues{
@@ -170,19 +184,19 @@ var responseTests = []struct {
 		},
 	},
 	{
-		EligibleResponse18Weeks,
+		eligibleResponse18Weeks,
 		"18 week max age, 18 weeks",
 		[]string{"max-age=10886400; includeSubDomains; preload"},
 		Issues{},
 	},
 	{
-		EligibleResponse1Year,
+		eligibleResponse1Year,
 		"1 year max age, 1 year",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
 	},
 	{
-		EligibleResponse18Weeks,
+		eligibleResponse18Weeks,
 		"1 year max age, 18 weeks",
 		[]string{"max-age=31536000; includeSubDomains; preload"},
 		Issues{},
