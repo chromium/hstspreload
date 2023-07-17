@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 	"golang.org/x/net/publicsuffix"
 )
 
@@ -46,13 +47,21 @@ var allowedWWWeTLDs = map[string]bool{
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableDomain(domain string) (header *string, issues Issues) {
-	header, issues, _ = PreloadableDomainResponse(domain)
+	header, issues, _ = EligibleDomainResponse(domain, preloadlist.Bulk1Year)
 	return header, issues
 }
 
-// PreloadableDomainResponse is like PreloadableDomain, but also returns
+// EligibleDomain checks whether the domain passes HSTS preload
+// requirements for Chromium when it was added using the 
+// requirements from PreloadableDomain
+func EligibleDomain(domain string, policy preloadlist.PolicyType) (header *string, issues Issues) {
+	header, issues, _ = EligibleDomainResponse(domain, policy)
+	return header, issues
+}
+
+// EligibleDomainResponse is like EligibleDomain, but also returns
 // the initial response over HTTPS.
-func PreloadableDomainResponse(domain string) (header *string, issues Issues, resp *http.Response) {
+func EligibleDomainResponse(domain string, policy preloadlist.PolicyType) (header *string, issues Issues, resp *http.Response) {
 	// Check domain format issues first, since we can report something
 	// useful even if the other checks fail.
 	issues = combineIssues(issues, checkDomainFormat(domain))
@@ -81,7 +90,7 @@ func PreloadableDomainResponse(domain string) (header *string, issues Issues, re
 		// PreloadableResponse
 		go func() {
 			var preloadableIssues Issues
-			header, preloadableIssues = PreloadableResponse(resp)
+			header, preloadableIssues = EligibleResponse(resp, policy)
 			preloadableResponse <- preloadableIssues
 		}()
 

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 func checkSingleHeader(resp *http.Response) (header *string, issues Issues) {
@@ -28,13 +30,13 @@ func checkSingleHeader(resp *http.Response) (header *string, issues Issues) {
 	return &hstsHeaders[0], issues
 }
 
-func checkResponse(resp *http.Response, headerCondition func(string) Issues) (header *string, issues Issues) {
+func checkResponse(resp *http.Response, headerCondition func(string, preloadlist.PolicyType) Issues, policy preloadlist.PolicyType) (header *string, issues Issues) {
 	header, issues = checkSingleHeader(resp)
 	if len(issues.Errors) > 0 {
 		return nil, issues
 	}
 
-	return header, combineIssues(issues, headerCondition(*header))
+	return header, combineIssues(issues, headerCondition(*header, policy))
 }
 
 // PreloadableResponse checks whether an resp has a single HSTS header that
@@ -45,7 +47,18 @@ func checkResponse(resp *http.Response, headerCondition func(string) Issues) (he
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
-	return checkResponse(resp, PreloadableHeaderString)
+	return checkResponse(resp, EligibleHeaderString, preloadlist.Bulk1Year)
+}
+
+// EligibleResponse checks whether an resp has a single HSTS header that
+// passes the preload requirements.
+//
+// Iff a single HSTS header was received, `header` contains its value, else
+// `header` is `nil`.
+// To interpret `issues`, see the list of conventions in the
+// documentation for Issues.
+func EligibleResponse(resp *http.Response, policy preloadlist.PolicyType) (header *string, issues Issues) {
+	return checkResponse(resp, EligibleHeaderString, policy)
 }
 
 // RemovableResponse checks whether an resp has a single HSTS header that
@@ -56,7 +69,7 @@ func PreloadableResponse(resp *http.Response) (header *string, issues Issues) {
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func RemovableResponse(resp *http.Response) (header *string, issues Issues) {
-	return checkResponse(resp, RemovableHeaderString)
+	return checkResponse(resp, func(domain string, policy preloadlist.PolicyType) Issues { return RemovableHeaderString(domain) }, preloadlist.Bulk1Year)
 }
 
 // getFirstResponse makes a GET request to `initialURL` without redirecting.
