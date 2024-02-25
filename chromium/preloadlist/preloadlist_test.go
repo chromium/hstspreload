@@ -1,7 +1,6 @@
 package preloadlist
 
 import (
-	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -130,16 +129,16 @@ var (
   ]
 }`
 	testParsed = PreloadList{Entries: []Entry{
-		{"garron.net", "force-https", true},
-		{"example.com", "force-https", false},
-		{"gmail.com", "force-https", false},
-		{"google.com", "", false},
-		{"pinned.badssl.com", "", false}},
+		{"garron.net", "force-https", true, ""},
+		{"example.com", "force-https", false, ""},
+		{"gmail.com", "force-https", false, ""},
+		{"google.com", "", false, ""},
+		{"pinned.badssl.com", "", false, ""}},
 	}
 )
 
 func TestNewFromFile(t *testing.T) {
-	f, err := ioutil.TempFile("", "preloadlist-test")
+	f, err := os.CreateTemp("", "preloadlist-test")
 	if err != nil {
 		t.Fatal(err)
 	}

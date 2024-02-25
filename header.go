@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 const (
-	oneYear  = 86400 * 365
-	tenYears = 10 * oneYear
+	eighteenWeeks = 86400 * 7 * 18
+	oneYear       = 86400 * 365
+	tenYears      = 10 * oneYear
 
 	hstsMinimumMaxAge = oneYear
 )
@@ -202,8 +205,15 @@ func preloadableHeaderSubDomains(hstsHeader HSTSHeader) Issues {
 	return issues
 }
 
-func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
+func preloadableHeaderMaxAge(hstsHeader HSTSHeader, policy preloadlist.PolicyType) Issues {
 	issues := Issues{}
+
+	maxAge := hstsMinimumMaxAge
+	ageName := "1 year"
+	if policy == preloadlist.Bulk18Weeks {
+		maxAge = eighteenWeeks
+		ageName = "18 weeks"
+	} 
 
 	switch {
 	case hstsHeader.MaxAge == nil:
@@ -212,22 +222,22 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
 			"No max-age directice",
 			"Header requirement error: Header must contain a valid `max-age` directive.")
 
-	case hstsHeader.MaxAge.Seconds < 0:
-		issues = issues.addErrorf(
-			"internal.header.preloadable.max_age.negative",
-			"Negative max-age",
-			"Encountered an HSTSHeader with a negative max-age that does not equal MaxAgeNotPresent: %d", hstsHeader.MaxAge.Seconds)
-
-	case hstsHeader.MaxAge.Seconds < hstsMinimumMaxAge:
+	case hstsHeader.MaxAge.Seconds < uint64(maxAge):
 		errorStr := fmt.Sprintf(
-			"The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=%d.",
-			hstsHeader.MaxAge.Seconds,
+			"The max-age must be at least %d seconds (≈ %s), but the header currently only has max-age=%d.",
+			maxAge, ageName, hstsHeader.MaxAge.Seconds,
 		)
 		if hstsHeader.MaxAge.Seconds == 0 {
 			errorStr += " If you are trying to remove this domain from the preload list, please visit https://hstspreload.org/removal/"
 			issues = issues.addErrorf(
 				"header.preloadable.max_age.zero",
 				"Max-age is 0",
+				errorStr,
+			)
+		} else if policy == preloadlist.Bulk18Weeks {
+			issues = issues.addErrorf(
+				"header.preloadable.max_age.below_18_weeks",
+				"Max-age too low",
 				errorStr,
 			)
 		} else {
@@ -259,11 +269,15 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader) Issues {
 //
 // Most of the time, you'll probably want to use PreloadableHeaderString() instead.
 func PreloadableHeader(hstsHeader HSTSHeader) Issues {
+	return EligibleHeader(hstsHeader, preloadlist.Bulk1Year)
+}
+
+func EligibleHeader(hstsHeader HSTSHeader, policy preloadlist.PolicyType) Issues {
 	issues := Issues{}
 
 	issues = combineIssues(issues, preloadableHeaderSubDomains(hstsHeader))
 	issues = combineIssues(issues, preloadableHeaderPreload(hstsHeader))
-	issues = combineIssues(issues, preloadableHeaderMaxAge(hstsHeader))
+	issues = combineIssues(issues, preloadableHeaderMaxAge(hstsHeader, policy))
 	return issues
 }
 
@@ -303,6 +317,17 @@ func RemovableHeader(hstsHeader HSTSHeader) Issues {
 func PreloadableHeaderString(headerString string) Issues {
 	hstsHeader, issues := ParseHeaderString(headerString)
 	return combineIssues(issues, PreloadableHeader(hstsHeader))
+}
+
+// EligibleHeaderString is a convenience function that calls
+// ParseHeaderString() and then calls on EligibleHeader() the parsed
+// header. It returns all issues from both calls, combined.
+//
+// To interpret the result, see the list of conventions in the
+// documentation for Issues.
+func EligibleHeaderString(headerString string, policy preloadlist.PolicyType) Issues {
+	hstsHeader, issues := ParseHeaderString(headerString)
+	return combineIssues(issues, EligibleHeader(hstsHeader, policy))
 }
 
 // RemovableHeaderString is a convenience function that calls

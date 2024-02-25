@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 	"golang.org/x/net/publicsuffix"
 )
 
@@ -22,16 +23,12 @@ var dialer = net.Dialer{
 	Timeout: dialTimeout,
 }
 
-var clientWithTimeout = http.Client{
-	Timeout: dialTimeout,
-}
-
 // List of eTLDs for which:
 // - `www` subdomains are commonly available over HTTP, but
 // - site owners have no way to serve valid HTTPS on the `www` subdomain.
 //
-// We whitelist such eTLDs to waive the `www` subdomain requirement.
-var whitelistedWWWeTLDs = map[string]bool{
+// We allowlist such eTLDs to waive the `www` subdomain requirement.
+var allowedWWWeTLDs = map[string]bool{
 	"appspot.com": true,
 }
 
@@ -50,13 +47,21 @@ var whitelistedWWWeTLDs = map[string]bool{
 // To interpret `issues`, see the list of conventions in the
 // documentation for Issues.
 func PreloadableDomain(domain string) (header *string, issues Issues) {
-	header, issues, _ = PreloadableDomainResponse(domain)
+	header, issues, _ = EligibleDomainResponse(domain, preloadlist.Bulk1Year)
 	return header, issues
 }
 
-// PreloadableDomainResponse is like PreloadableDomain, but also returns
+// EligibleDomain checks whether the domain passes HSTS preload
+// requirements for Chromium when it was added using the 
+// requirements from PreloadableDomain
+func EligibleDomain(domain string, policy preloadlist.PolicyType) (header *string, issues Issues) {
+	header, issues, _ = EligibleDomainResponse(domain, policy)
+	return header, issues
+}
+
+// EligibleDomainResponse is like EligibleDomain, but also returns
 // the initial response over HTTPS.
-func PreloadableDomainResponse(domain string) (header *string, issues Issues, resp *http.Response) {
+func EligibleDomainResponse(domain string, policy preloadlist.PolicyType) (header *string, issues Issues, resp *http.Response) {
 	// Check domain format issues first, since we can report something
 	// useful even if the other checks fail.
 	issues = combineIssues(issues, checkDomainFormat(domain))
@@ -85,7 +90,7 @@ func PreloadableDomainResponse(domain string) (header *string, issues Issues, re
 		// PreloadableResponse
 		go func() {
 			var preloadableIssues Issues
-			header, preloadableIssues = PreloadableResponse(resp)
+			header, preloadableIssues = EligibleResponse(resp, policy)
 			preloadableResponse <- preloadableIssues
 		}()
 
@@ -106,8 +111,8 @@ func PreloadableDomainResponse(domain string) (header *string, issues Issues, re
 			eTLD, _ := publicsuffix.PublicSuffix(domain)
 
 			// Skip the WWW check if the domain is not eTLD+1, or if the
-			// eTLD is whitelisted.
-			if len(levelIssues.Errors) != 0 || whitelistedWWWeTLDs[eTLD] {
+			// eTLD is allowed.
+			if len(levelIssues.Errors) != 0 || allowedWWWeTLDs[eTLD] {
 				www <- Issues{}
 			} else {
 				www <- checkWWW(domain)
@@ -208,7 +213,7 @@ func checkDomainFormat(domain string) Issues {
 			"Invalid domain name",
 			"Please provide a domain that does not end with `.`")
 	}
-	if strings.Index(domain, "..") != -1 {
+	if strings.Contains(domain, "..") {
 		return issues.addErrorf(
 			IssueCode("domain.format.contains_double_dot"),
 			"Invalid domain name",
@@ -235,6 +240,14 @@ func checkDomainFormat(domain string) Issues {
 		}
 
 		return issues.addErrorf("domain.format.invalid_characters", "Invalid domain name", "Please provide a domain using valid characters (letters, numbers, dashes, dots).")
+	}
+
+	ip := net.ParseIP(domain)
+	if ip != nil {
+		return issues.addErrorf(
+			IssueCode("domain.format.is_ip_address"),
+			"Invalid domain name",
+			"Please provide a domain, not an IP address")
 	}
 
 	return issues

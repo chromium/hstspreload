@@ -42,6 +42,10 @@ var tooManyRedirectsTests = []struct {
 }
 
 func TestTooManyRedirects(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
@@ -58,6 +62,10 @@ func TestTooManyRedirects(t *testing.T) {
 }
 
 func TestInsecureRedirect(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
@@ -82,6 +90,10 @@ func TestInsecureRedirect(t *testing.T) {
 }
 
 func TestIndirectInsecureRedirect(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
@@ -106,6 +118,10 @@ func TestIndirectInsecureRedirect(t *testing.T) {
 }
 
 func TestExplicitPortFirstRedirect(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
@@ -127,6 +143,10 @@ func TestExplicitPortFirstRedirect(t *testing.T) {
 }
 
 func TestHTTPUnavailable(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
@@ -161,6 +181,10 @@ func TestHTTPUnavailable(t *testing.T) {
 }
 
 func TestHSTSOverHTTP(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 
@@ -285,6 +309,10 @@ var preloadableHTTPRedirectsTests = []preloadableHTTPRedirectsTest{
 }
 
 func TestPreloadableHTTPRedirects(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 

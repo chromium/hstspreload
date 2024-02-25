@@ -11,7 +11,7 @@ See <https://github.com/chromium/hstspreload.org> for the submission site code.
 
 To check if a domain satisfies the requirements for preloading (assuming `$PATH` contains `$GOPATH/bin/`):
 
-    go get github.com/chromium/hstspreload/...
+    go install github.com/chromium/hstspreload/...@latest
     hstspreload preloadabledomain wikipedia.org
 
 For full documentation, see <https://godoc.org/github.com/chromium/hstspreload>

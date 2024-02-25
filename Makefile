@@ -15,7 +15,8 @@ build:
 .PHONY: lint
 lint:
 	go vet ${PROJECT}
-	golint -set_exit_status ${PROJECT}
+	go install honnef.co/go/tools/cmd/staticcheck@v0.4.3
+	staticcheck ${PROJECT}
 
 .PHONY: pre-commit
 pre-commit: lint build test

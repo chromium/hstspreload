@@ -4,7 +4,22 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
+
+/******** EligibleResponse Wrappers. ********/
+// EligibleResponse1Year calls EligibleResponse with a policy of 
+// "bulk-1-year". Function exists for testing purposes
+func eligibleResponse1Year(resp *http.Response) (header *string, issues Issues) {
+	return EligibleResponse(resp, preloadlist.Bulk1Year)
+}
+
+// EligibleResponse18Weeks calls EligibleResonse with a policy of
+// "bulk-18-weeks". Function exists for testing purposes
+func eligibleResponse18Weeks(resp *http.Response) (header *string, issues Issues) {
+	return EligibleResponse(resp, preloadlist.Bulk18Weeks)
+}
 
 /******** Examples. ********/
 
@@ -113,9 +128,82 @@ var responseTests = []struct {
 			},
 		},
 	},
+
+		/******** EligibleResponse() ********/
+	{
+		eligibleResponse1Year,
+		"good header 1 year",
+		[]string{"max-age=31536000; includeSubDomains; preload"},
+		Issues{},
+	},
+	{
+		eligibleResponse18Weeks,
+		"good header 18 weeks",
+		[]string{"max-age=10886400; includeSubDomains; preload"},
+		Issues{},
+	},
+	{
+		eligibleResponse1Year,
+		"single header, multiple errors, 1 year",
+		[]string{"includeSubDomains; max-age=100"},
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.preload.missing"},
+				{
+					Code:    "header.preloadable.max_age.below_1_year",
+					Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=100.",
+				},
+			},
+		},
+	},
+	{
+		eligibleResponse18Weeks,
+		"single header, multiple errors, 18 weeks",
+		[]string{"includeSubDomains; max-age=100"},
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.preload.missing"},
+				{
+					Code:    "header.preloadable.max_age.below_18_weeks",
+					Message: "The max-age must be at least 10886400 seconds (≈ 18 weeks), but the header currently only has max-age=100.",
+				},
+			},
+		},
+	},
+	{
+		eligibleResponse1Year,
+		"18 week max age, 1 year",
+		[]string{"max-age=10886400; includeSubDomains; preload"},
+		Issues{
+			Errors: []Issue{
+				{
+					Code:    "header.preloadable.max_age.below_1_year",
+					Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=10886400.",
+				},
+			},
+		},
+	},
+	{
+		eligibleResponse18Weeks,
+		"18 week max age, 18 weeks",
+		[]string{"max-age=10886400; includeSubDomains; preload"},
+		Issues{},
+	},
+	{
+		eligibleResponse1Year,
+		"1 year max age, 1 year",
+		[]string{"max-age=31536000; includeSubDomains; preload"},
+		Issues{},
+	},
+	{
+		eligibleResponse18Weeks,
+		"1 year max age, 18 weeks",
+		[]string{"max-age=31536000; includeSubDomains; preload"},
+		Issues{},
+	},
 }
 
-func TestPreloabableResponseAndRemovableResponse(t *testing.T) {
+func TestPreloabableResponseRemovableAndEligibleResponse(t *testing.T) {
 	for _, tt := range responseTests {
 
 		resp := &http.Response{}

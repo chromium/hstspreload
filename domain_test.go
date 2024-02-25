@@ -38,6 +38,9 @@ var testCheckDomainFormatTests = []struct {
 	{"example&co.com",
 		Issues{Errors: []Issue{{Code: "domain.format.invalid_characters"}}},
 	},
+	{"1.1.1.1",
+		Issues{Errors: []Issue{{Code: "domain.format.is_ip_address"}}},
+	},
 }
 
 func TestCheckDomainFormat(t *testing.T) {
@@ -137,7 +140,7 @@ var preloadableDomainTests = []preloadableDomainTest{
 	},
 	{
 		PreloadableDomain,
-		"www.no_tls (not whitelisted)",
+		"www.no_tls (not allowed)",
 		"lgarron.github.io",
 		false, "",
 		Issues{
@@ -149,7 +152,7 @@ var preloadableDomainTests = []preloadableDomainTest{
 	},
 	{
 		PreloadableDomain,
-		"www.no_tls whitelisted",
+		"www.no_tls (allowed)",
 		"hstspreload.appspot.com",
 		true, "max-age=31536000; includeSubDomains; preload",
 		Issues{},
@@ -262,6 +265,10 @@ var preloadableDomainTests = []preloadableDomainTest{
 }
 
 func TestPreloadableDomainAndRemovableDomain(t *testing.T) {
+	// Skip this test because it is failing due to relying on behavior of an
+	// external domain: https://github.com/chromium/hstspreload/issues/112.
+	t.SkipNow()
+
 	skipIfShort(t)
 	t.Parallel()
 

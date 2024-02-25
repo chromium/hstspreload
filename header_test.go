@@ -3,6 +3,8 @@ package hstspreload
 import (
 	"fmt"
 	"testing"
+
+	"github.com/chromium/hstspreload/chromium/preloadlist"
 )
 
 const (
@@ -66,12 +68,6 @@ func TestHeadersEqual(t *testing.T) {
 		},
 	) {
 		t.Errorf("HSTSHeader structs should be considered non-equal if preload values don't match.")
-	}
-}
-
-func expectHeadersEqual(t *testing.T, expected HSTSHeader, actual HSTSHeader) {
-	if !headersEqual(actual, expected) {
-		t.Errorf(headersShouldBeEqual, actual, expected)
 	}
 }
 
@@ -436,6 +432,177 @@ var preloadableHeaderStringTests = []struct {
 func TestPreloadableHeaderString(t *testing.T) {
 	for _, tt := range preloadableHeaderStringTests {
 		issues := PreloadableHeaderString(tt.header)
+		if !issues.Match(tt.expectedIssues) {
+			t.Errorf("[%s] "+issuesShouldMatch, tt.description, issues, tt.expectedIssues)
+		}
+	}
+}
+
+// Eligible Domain tests
+var eligibleHeaderStringTests = []struct {
+	description    string
+	header         string
+	expectedIssues Issues
+	policy         preloadlist.PolicyType
+}{
+
+	/******** no errors, no warnings ********/
+
+	{
+		"no issues, policy: 1 year",
+		"max-age=31536000; includeSubDomains; preload",
+		Issues{},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"no issues, policy: 18 weeks",
+		"max-age=10886400; includeSubDomains; preload",
+		Issues{},
+		preloadlist.Bulk18Weeks,
+	},
+
+	/******** no errors, warnings only ********/
+
+	{
+		"max-age > 10 years, policy: 1 year",
+		"max-age=315360001; preload; includeSubDomains",
+		Issues{Warnings: []Issue{{
+			Code:    "header.preloadable.max_age.over_10_years",
+			Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
+		}}},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"max-age > 10 years, policy: 18 weeks",
+		"max-age=315360001; preload; includeSubDomains",
+		Issues{Warnings: []Issue{{
+			Code:    "header.preloadable.max_age.over_10_years",
+			Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
+		}}},
+		preloadlist.Bulk18Weeks,
+	},
+
+	/******** errors only, no warnings ********/
+
+	{
+		"empty, policy: 1 year",
+		"",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.include_sub_domains.missing"},
+				{Code: "header.preloadable.preload.missing"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+			Warnings: []Issue{{Code: "header.parse.empty"}},
+		},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"empty, policy: 18 weeks",
+		"",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.preloadable.include_sub_domains.missing"},
+				{Code: "header.preloadable.preload.missing"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+			Warnings: []Issue{{Code: "header.parse.empty"}},
+		},
+		preloadlist.Bulk18Weeks,
+	},
+	{
+		"max-age without value, policy: 1 year",
+		"includeSubDomains; preload; max-age",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.parse.invalid.max_age.no_value"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+		},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"max-age without value, policy: 18 weeks",
+		"includeSubDomains; preload; max-age",
+		Issues{
+			Errors: []Issue{
+				{Code: "header.parse.invalid.max_age.no_value"},
+				{Code: "header.preloadable.max_age.missing"},
+			},
+		},
+		preloadlist.Bulk18Weeks,
+	},
+	{
+		"maxAge=0, policy: 1 year", // Give information about what to do if you want to remove HSTS.
+		"includeSubDomains; preload; max-age=0",
+		Issues{Errors: []Issue{{Code: "header.preloadable.max_age.zero"}}},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"maxAge=0, policy: 18 weeks", // Give information about what to do if you want to remove HSTS.
+		"includeSubDomains; preload; max-age=0",
+		Issues{Errors: []Issue{{Code: "header.preloadable.max_age.zero"}}},
+		preloadlist.Bulk18Weeks,
+	},
+	{
+		"maxAge=100, policy: 1 year",
+		"includeSubDomains; preload; max-age=100",
+		Issues{Errors: []Issue{{
+			Code:    "header.preloadable.max_age.below_1_year",
+			Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=100.",
+		}}},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"maxAge=100, policy: 18 weeks",
+		"includeSubDomains; preload; max-age=100",
+		Issues{Errors: []Issue{{
+			Code:    "header.preloadable.max_age.below_18_weeks",
+			Message: "The max-age must be at least 10886400 seconds (≈ 18 weeks), but the header currently only has max-age=100.",
+		}}},
+		preloadlist.Bulk18Weeks,
+	},
+	{
+		"maxAge=10886400, policy: 1 year",
+		"includeSubDomains; preload; max-age=10886400",
+		Issues{Errors: []Issue{{
+			Code:    "header.preloadable.max_age.below_1_year",
+			Message: "The max-age must be at least 31536000 seconds (≈ 1 year), but the header currently only has max-age=10886400.",
+		}}},
+		preloadlist.Bulk1Year,
+	},
+
+	/******** errors and warnings ********/
+
+	{
+		"missing preload, >10 years, policy: 1 year",
+		"max-age=315360001; includeSubDomains",
+		Issues{
+			Errors: []Issue{{Code: "header.preloadable.preload.missing"}},
+			Warnings: []Issue{{
+				Code:    "header.preloadable.max_age.over_10_years",
+				Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
+			}},
+		},
+		preloadlist.Bulk1Year,
+	},
+	{
+		"missing preload, >10 years, policy: 18 weeks",
+		"max-age=315360001; includeSubDomains",
+		Issues{
+			Errors: []Issue{{Code: "header.preloadable.preload.missing"}},
+			Warnings: []Issue{{
+				Code:    "header.preloadable.max_age.over_10_years",
+				Message: "FYI: The max-age (315360001 seconds) is longer than 10 years, which is an unusually long value.",
+			}},
+		},
+		preloadlist.Bulk18Weeks,
+	},
+}
+
+func TestEligibleHeaderString(t *testing.T) {
+	for _, tt := range eligibleHeaderStringTests {
+		issues := EligibleHeaderString(tt.header, tt.policy)
 		if !issues.Match(tt.expectedIssues) {
 			t.Errorf("[%s] "+issuesShouldMatch, tt.description, issues, tt.expectedIssues)
 		}
