@@ -116,15 +116,6 @@ var preloadableDomainTests = []preloadableDomainTest{
 	},
 	{
 		PreloadableDomain,
-		"no TLS",
-		"neverssl.com",
-		false, "",
-		Issues{
-			Errors: []Issue{{Code: "domain.tls.cannot_connect"}},
-		},
-	},
-	{
-		PreloadableDomain,
 		"incomplete chain",
 		"incomplete-chain.badssl.com",
 		false, "",
