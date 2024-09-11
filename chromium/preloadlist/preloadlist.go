@@ -94,6 +94,11 @@ type Entry struct {
 	Policy            PolicyType `json:"policy"`
 }
 
+// Equal checks if Entry e is equal to Entry e2 using == to compare all fields.
+func (e Entry) Equal(e2 Entry) bool {
+	return e.Name == e2.Name && e.Mode == e2.Mode && e.IncludeSubDomains == e2.IncludeSubDomains && e.Policy == e2.Policy
+}
+
 // IndexedEntries is case-insensitive index of
 // the entries from the given PreloadList.
 type IndexedEntries struct {
