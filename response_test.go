@@ -85,7 +85,7 @@ var responseTests = []struct {
 			Errors: []Issue{
 				{Code: "header.preloadable.include_sub_domains.missing", Summary: "No includeSubDomains directive", Message: "The header must contain the `includeSubDomains` directive."},
 				{Code: "header.preloadable.preload.missing", Summary: "No preload directive", Message: "The header must contain the `preload` directive."},
-				{Code: "header.preloadable.max_age.missing", Summary: "No max-age directice", Message: "Header requirement error: Header must contain a valid `max-age` directive."},
+				{Code: "header.preloadable.max_age.missing", Summary: "No max-age directive", Message: "Header requirement error: Header must contain a valid `max-age` directive."},
 			},
 			Warnings: []Issue{{Code: "header.parse.empty", Summary: "Empty Header", Message: "The HSTS header is empty."}},
 		},
