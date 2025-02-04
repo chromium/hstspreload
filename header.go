@@ -219,7 +219,7 @@ func preloadableHeaderMaxAge(hstsHeader HSTSHeader, policy preloadlist.PolicyTyp
 	case hstsHeader.MaxAge == nil:
 		issues = issues.addErrorf(
 			"header.preloadable.max_age.missing",
-			"No max-age directice",
+			"No max-age directive",
 			"Header requirement error: Header must contain a valid `max-age` directive.")
 
 	case hstsHeader.MaxAge.Seconds < uint64(maxAge):
