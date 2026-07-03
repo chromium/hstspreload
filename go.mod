@@ -1,7 +1,5 @@
 module github.com/chromium/hstspreload
 
-go 1.23.0
+go 1.25.0
 
-toolchain go1.23.5
-
-require golang.org/x/net v0.39.0
+require golang.org/x/net v0.55.0
